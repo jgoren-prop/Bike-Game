@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://run_hud_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/run_hud.gd" id="1_run_hud"]
+
+[node name="RunHUD" type="CanvasLayer"]
+script = ExtResource("1_run_hud")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_bottom = 120.0
+grow_horizontal = 0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StageLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "STAGE 1"
+horizontal_alignment = 2
+
+[node name="TimeLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "TIME: 1:00.00"
+horizontal_alignment = 2
+
+[node name="PotLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "POT: $100"
+horizontal_alignment = 2
