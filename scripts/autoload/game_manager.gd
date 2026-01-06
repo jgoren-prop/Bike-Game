@@ -7,6 +7,11 @@ enum GameState { MENU, HUB, IN_RUN, PAUSED }
 
 var current_state: GameState = GameState.HUB
 
+# Stats tracking
+var best_stage: int = 0
+var total_runs: int = 0
+var total_earnings: int = 0
+
 signal state_changed(new_state: GameState)
 
 

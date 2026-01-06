@@ -21,6 +21,8 @@ GameManager="*res://scripts/autoload/game_manager.gd"
 Economy="*res://scripts/autoload/economy.gd"
 RunManager="*res://scripts/autoload/run_manager.gd"
 BikeData="*res://scripts/autoload/bike_data.gd"
+SaveManager="*res://scripts/autoload/save_manager.gd"
+DevPanel="*res://scenes/ui/dev_panel.tscn"
 
 [input]
 

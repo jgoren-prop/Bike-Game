@@ -25,10 +25,14 @@ func set_pot_for_stage(stage: int) -> void:
 
 
 func cash_out() -> void:
+	var amount: int = pot
 	wallet += pot
 	wallet_changed.emit(wallet)
 	pot = 0
 	pot_changed.emit(pot)
+	# Track earnings and save
+	GameManager.total_earnings += amount
+	SaveManager.save_game()
 
 
 func lose_pot() -> void:
@@ -45,6 +49,7 @@ func spend(cost: int) -> bool:
 		return false
 	wallet -= cost
 	wallet_changed.emit(wallet)
+	SaveManager.save_game()
 	return true
 
 

@@ -1,0 +1,304 @@
+[gd_scene load_steps=22 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/stage_base.gd" id="1_stage_base"]
+[ext_resource type="Script" path="res://scripts/systems/pusher_block.gd" id="2_pusher"]
+[ext_resource type="Script" path="res://scripts/systems/moving_platform.gd" id="3_moving"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wide"]
+size = Vector3(14, 1, 35)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wide"]
+size = Vector3(14, 1, 35)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gauntlet"]
+size = Vector3(8, 1, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gauntlet"]
+size = Vector3(8, 1, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pusher"]
+size = Vector3(3, 3, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pusher"]
+size = Vector3(3, 3, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_narrow"]
+size = Vector3(5, 1, 25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_narrow"]
+size = Vector3(5, 1, 25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_platform"]
+size = Vector3(10, 1, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_platform"]
+size = Vector3(10, 1, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_road"]
+albedo_color = Color(0.25, 0.28, 0.32, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_danger"]
+albedo_color = Color(0.8, 0.2, 0.1, 1)
+emission_enabled = true
+emission = Color(0.3, 0.05, 0.02, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pusher"]
+albedo_color = Color(0.9, 0.4, 0.1, 1)
+emission_enabled = true
+emission = Color(0.4, 0.15, 0.02, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_warning"]
+albedo_color = Color(1, 0.6, 0.1, 1)
+emission_enabled = true
+emission = Color(0.4, 0.2, 0.02, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_edge"]
+albedo_color = Color(1, 0.4, 0.1, 1)
+emission_enabled = true
+emission = Color(0.4, 0.15, 0.02, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_edge"]
+size = Vector3(0.4, 0.25, 35)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gate"]
+size = Vector3(12, 5, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_finish"]
+size = Vector3(14, 4, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_finish"]
+albedo_color = Color(1, 1, 1, 1)
+emission_enabled = true
+emission = Color(0.5, 0.5, 0.5, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fall"]
+size = Vector3(600, 1, 600)
+
+[node name="Stage4" type="Node3D"]
+script = ExtResource("1_stage_base")
+stage_number = 4
+time_limit = 120.0
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 12)
+
+[node name="StartGate" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StartGate"]
+shape = SubResource("BoxShape3D_gate")
+
+[node name="Section1_Start" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 24)
+
+[node name="Collision" type="CollisionShape3D" parent="Section1_Start"]
+shape = SubResource("BoxShape3D_wide")
+
+[node name="Mesh" type="MeshInstance3D" parent="Section1_Start"]
+mesh = SubResource("BoxMesh_wide")
+surface_material_override/0 = SubResource("StandardMaterial3D_road")
+
+[node name="EdgeL" type="MeshInstance3D" parent="Section1_Start"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 0.62, 0)
+mesh = SubResource("BoxMesh_edge")
+surface_material_override/0 = SubResource("StandardMaterial3D_edge")
+
+[node name="EdgeR" type="MeshInstance3D" parent="Section1_Start"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8, 0.62, 0)
+mesh = SubResource("BoxMesh_edge")
+surface_material_override/0 = SubResource("StandardMaterial3D_edge")
+
+[node name="Gauntlet1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 65)
+
+[node name="Collision" type="CollisionShape3D" parent="Gauntlet1"]
+shape = SubResource("BoxShape3D_gauntlet")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gauntlet1"]
+mesh = SubResource("BoxMesh_gauntlet")
+surface_material_override/0 = SubResource("StandardMaterial3D_danger")
+
+[node name="Pusher1_Left" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2, 55)
+script = ExtResource("2_pusher")
+push_distance = Vector3(10, 0, 0)
+push_duration = 0.4
+wait_time = 2.5
+
+[node name="Collision" type="CollisionShape3D" parent="Pusher1_Left"]
+shape = SubResource("BoxShape3D_pusher")
+
+[node name="Mesh" type="MeshInstance3D" parent="Pusher1_Left"]
+mesh = SubResource("BoxMesh_pusher")
+surface_material_override/0 = SubResource("StandardMaterial3D_pusher")
+
+[node name="Pusher2_Right" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 70)
+script = ExtResource("2_pusher")
+push_distance = Vector3(-10, 0, 0)
+push_duration = 0.4
+wait_time = 2.0
+
+[node name="Collision" type="CollisionShape3D" parent="Pusher2_Right"]
+shape = SubResource("BoxShape3D_pusher")
+
+[node name="Mesh" type="MeshInstance3D" parent="Pusher2_Right"]
+mesh = SubResource("BoxMesh_pusher")
+surface_material_override/0 = SubResource("StandardMaterial3D_pusher")
+
+[node name="Pusher3_Left" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2, 85)
+script = ExtResource("2_pusher")
+push_distance = Vector3(10, 0, 0)
+push_duration = 0.35
+wait_time = 1.8
+
+[node name="Collision" type="CollisionShape3D" parent="Pusher3_Left"]
+shape = SubResource("BoxShape3D_pusher")
+
+[node name="Mesh" type="MeshInstance3D" parent="Pusher3_Left"]
+mesh = SubResource("BoxMesh_pusher")
+surface_material_override/0 = SubResource("StandardMaterial3D_pusher")
+
+[node name="Section2_Recovery" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 105)
+
+[node name="Collision" type="CollisionShape3D" parent="Section2_Recovery"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="Mesh" type="MeshInstance3D" parent="Section2_Recovery"]
+mesh = SubResource("BoxMesh_platform")
+surface_material_override/0 = SubResource("StandardMaterial3D_road")
+
+[node name="NarrowPath1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 135)
+
+[node name="Collision" type="CollisionShape3D" parent="NarrowPath1"]
+shape = SubResource("BoxShape3D_narrow")
+
+[node name="Mesh" type="MeshInstance3D" parent="NarrowPath1"]
+mesh = SubResource("BoxMesh_narrow")
+surface_material_override/0 = SubResource("StandardMaterial3D_warning")
+
+[node name="NarrowPath2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 165)
+
+[node name="Collision" type="CollisionShape3D" parent="NarrowPath2"]
+shape = SubResource("BoxShape3D_narrow")
+
+[node name="Mesh" type="MeshInstance3D" parent="NarrowPath2"]
+mesh = SubResource("BoxMesh_narrow")
+surface_material_override/0 = SubResource("StandardMaterial3D_warning")
+
+[node name="NarrowPath3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 195)
+
+[node name="Collision" type="CollisionShape3D" parent="NarrowPath3"]
+shape = SubResource("BoxShape3D_narrow")
+
+[node name="Mesh" type="MeshInstance3D" parent="NarrowPath3"]
+mesh = SubResource("BoxMesh_narrow")
+surface_material_override/0 = SubResource("StandardMaterial3D_warning")
+
+[node name="Section3_PreGauntlet2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 230)
+
+[node name="Collision" type="CollisionShape3D" parent="Section3_PreGauntlet2"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="Mesh" type="MeshInstance3D" parent="Section3_PreGauntlet2"]
+mesh = SubResource("BoxMesh_platform")
+surface_material_override/0 = SubResource("StandardMaterial3D_road")
+
+[node name="Gauntlet2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 270)
+
+[node name="Collision" type="CollisionShape3D" parent="Gauntlet2"]
+shape = SubResource("BoxShape3D_gauntlet")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gauntlet2"]
+mesh = SubResource("BoxMesh_gauntlet")
+surface_material_override/0 = SubResource("StandardMaterial3D_danger")
+
+[node name="Pusher4_Alternating1" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2, 260)
+script = ExtResource("2_pusher")
+push_distance = Vector3(10, 0, 0)
+push_duration = 0.3
+wait_time = 1.5
+
+[node name="Collision" type="CollisionShape3D" parent="Pusher4_Alternating1"]
+shape = SubResource("BoxShape3D_pusher")
+
+[node name="Mesh" type="MeshInstance3D" parent="Pusher4_Alternating1"]
+mesh = SubResource("BoxMesh_pusher")
+surface_material_override/0 = SubResource("StandardMaterial3D_pusher")
+
+[node name="Pusher5_Alternating2" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 275)
+script = ExtResource("2_pusher")
+push_distance = Vector3(-10, 0, 0)
+push_duration = 0.3
+wait_time = 1.5
+
+[node name="Collision" type="CollisionShape3D" parent="Pusher5_Alternating2"]
+shape = SubResource("BoxShape3D_pusher")
+
+[node name="Mesh" type="MeshInstance3D" parent="Pusher5_Alternating2"]
+mesh = SubResource("BoxMesh_pusher")
+surface_material_override/0 = SubResource("StandardMaterial3D_pusher")
+
+[node name="Pusher6_Alternating3" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2, 290)
+script = ExtResource("2_pusher")
+push_distance = Vector3(10, 0, 0)
+push_duration = 0.3
+wait_time = 1.5
+
+[node name="Collision" type="CollisionShape3D" parent="Pusher6_Alternating3"]
+shape = SubResource("BoxShape3D_pusher")
+
+[node name="Mesh" type="MeshInstance3D" parent="Pusher6_Alternating3"]
+mesh = SubResource("BoxMesh_pusher")
+surface_material_override/0 = SubResource("StandardMaterial3D_pusher")
+
+[node name="Section4_Final" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 315)
+
+[node name="Collision" type="CollisionShape3D" parent="Section4_Final"]
+shape = SubResource("BoxShape3D_wide")
+
+[node name="Mesh" type="MeshInstance3D" parent="Section4_Final"]
+mesh = SubResource("BoxMesh_wide")
+surface_material_override/0 = SubResource("StandardMaterial3D_road")
+
+[node name="EdgeL" type="MeshInstance3D" parent="Section4_Final"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 0.62, 0)
+mesh = SubResource("BoxMesh_edge")
+surface_material_override/0 = SubResource("StandardMaterial3D_edge")
+
+[node name="EdgeR" type="MeshInstance3D" parent="Section4_Final"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8, 0.62, 0)
+mesh = SubResource("BoxMesh_edge")
+surface_material_override/0 = SubResource("StandardMaterial3D_edge")
+
+[node name="FinishGate" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 330)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FinishGate"]
+shape = SubResource("BoxShape3D_gate")
+
+[node name="FinishVisual" type="MeshInstance3D" parent="FinishGate"]
+mesh = SubResource("BoxMesh_finish")
+surface_material_override/0 = SubResource("StandardMaterial3D_finish")
+
+[node name="FallPlane" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -40, 170)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FallPlane"]
+shape = SubResource("BoxShape3D_fall")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 40, 0)
+light_energy = 1.2
+shadow_enabled = true

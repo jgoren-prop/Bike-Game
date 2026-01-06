@@ -46,10 +46,14 @@ func _setup_ui() -> void:
 
 
 func _on_continue_pressed() -> void:
-	# Reset player position for next stage
-	if _player_bike and spawn_point:
-		_player_bike.reset_position(spawn_point.global_position)
-	_stage_active = true
+	# Advance to next stage
+	RunManager.continue_to_next_stage()
+	var next_stage_path: String = RunManager.get_stage_scene_path(RunManager.current_stage)
+	if next_stage_path != "":
+		get_tree().change_scene_to_file(next_stage_path)
+	else:
+		# No more stages, return to hub
+		_return_to_hub()
 
 
 func _on_cash_out_pressed() -> void:
@@ -86,7 +90,10 @@ func _spawn_player() -> void:
 
 func _start_stage() -> void:
 	_stage_active = true
-	RunManager.start_run()
+	# Only start a new run if we're not already in one
+	# (continue_to_next_stage already handles timer for subsequent stages)
+	if RunManager.current_state == RunManager.RunState.IDLE:
+		RunManager.start_run()
 
 
 func _on_finish_gate_entered(body: Node3D) -> void:

@@ -5,8 +5,16 @@ class_name RunManagerClass
 
 enum RunState { IDLE, IN_RUN, STAGE_COMPLETE, RUN_FAILED }
 
-const STAGE_TIME_LIMITS: Array[float] = [0.0, 60.0, 70.0, 75.0, 80.0, 85.0, 90.0, 95.0, 100.0]
-const MAX_STAGE: int = 8
+const STAGE_TIME_LIMITS: Array[float] = [0.0, 90.0, 100.0, 110.0, 120.0, 150.0]
+const MAX_STAGE: int = 5
+const STAGE_SCENES: Array[String] = [
+	"",
+	"res://scenes/stages/stage_1.tscn",
+	"res://scenes/stages/stage_2.tscn",
+	"res://scenes/stages/stage_3.tscn",
+	"res://scenes/stages/stage_4.tscn",
+	"res://scenes/stages/stage_5.tscn"
+]
 
 var current_state: RunState = RunState.IDLE
 var current_stage: int = 0
@@ -37,6 +45,7 @@ func start_run() -> void:
 	current_state = RunState.IN_RUN
 	Economy.set_pot_for_stage(current_stage)
 	_start_stage_timer()
+	GameManager.total_runs += 1
 	run_started.emit()
 	stage_started.emit(current_stage)
 
@@ -65,6 +74,9 @@ func fail_run(reason: String) -> void:
 
 func cash_out() -> void:
 	var total: int = Economy.pot
+	# Track best stage
+	if current_stage > GameManager.best_stage:
+		GameManager.best_stage = current_stage
 	Economy.cash_out()
 	current_state = RunState.IDLE
 	current_stage = 0
@@ -93,3 +105,9 @@ func get_time_limit_for_stage(stage: int) -> float:
 	if stage < STAGE_TIME_LIMITS.size():
 		return STAGE_TIME_LIMITS[stage]
 	return 100.0
+
+
+func get_stage_scene_path(stage: int) -> String:
+	if stage > 0 and stage < STAGE_SCENES.size():
+		return STAGE_SCENES[stage]
+	return ""

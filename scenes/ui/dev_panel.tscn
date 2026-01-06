@@ -1,0 +1,74 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/dev_panel.gd" id="1_dev"]
+
+[node name="DevPanel" type="CanvasLayer"]
+layer = 100
+process_mode = 3
+script = ExtResource("1_dev")
+
+[node name="Panel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -180.0
+offset_right = 150.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "DEV PANEL (F1 to close)"
+horizontal_alignment = 1
+
+[node name="Sep1" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="UnlockAllBtn" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "Unlock Everything"
+
+[node name="Add10kBtn" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "Add 10,000 Coins"
+
+[node name="Add100kBtn" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "Add 100,000 Coins"
+
+[node name="Sep2" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="MaxSpeedBtn" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "Max Speed Upgrade"
+
+[node name="MaxAllUpgradesBtn" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "Max All Upgrades"
+
+[node name="Sep3" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="SkipStageBtn" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "Complete Current Stage"
+
+[node name="Sep4" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 1, 0.5, 1)
+text = "Ready"
+horizontal_alignment = 1

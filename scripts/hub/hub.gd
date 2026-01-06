@@ -12,7 +12,6 @@ class_name Hub
 @onready var prompt_label: Label = $HubUI/PromptLabel
 
 var _player_bike: BikeController
-var _best_stage: int = 0
 var _bike_shop: BikeShop
 var _upgrade_shop: UpgradeShop
 var _near_bike_shop: bool = false
@@ -124,14 +123,15 @@ func _on_shop_closed() -> void:
 
 
 func _start_run() -> void:
-	get_tree().change_scene_to_file("res://scenes/stages/test_stage.tscn")
+	var stage_path: String = RunManager.get_stage_scene_path(1)
+	get_tree().change_scene_to_file(stage_path)
 
 
 func _update_ui() -> void:
 	if wallet_label:
 		wallet_label.text = "WALLET: $%d" % Economy.wallet
 	if best_stage_label:
-		best_stage_label.text = "BEST: Stage %d" % _best_stage
+		best_stage_label.text = "BEST: Stage %d" % GameManager.best_stage
 
 
 func _on_wallet_changed(_new_amount: int) -> void:
