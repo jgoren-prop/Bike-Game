@@ -36,11 +36,13 @@ func _setup_ui() -> void:
 	_stage_clear_overlay = clear_scene.instantiate()
 	add_child(_stage_clear_overlay)
 	_stage_clear_overlay.continue_pressed.connect(_on_continue_pressed)
+	_stage_clear_overlay.cash_out_pressed.connect(_on_cash_out_pressed)
 
 	# Instantiate run failed overlay
 	var failed_scene: PackedScene = preload("res://scenes/ui/run_failed_overlay.tscn")
 	_run_failed_overlay = failed_scene.instantiate()
 	add_child(_run_failed_overlay)
+	_run_failed_overlay.returning_to_hub.connect(_on_returning_to_hub)
 
 
 func _on_continue_pressed() -> void:
@@ -48,6 +50,18 @@ func _on_continue_pressed() -> void:
 	if _player_bike and spawn_point:
 		_player_bike.reset_position(spawn_point.global_position)
 	_stage_active = true
+
+
+func _on_cash_out_pressed() -> void:
+	_return_to_hub()
+
+
+func _on_returning_to_hub() -> void:
+	_return_to_hub()
+
+
+func _return_to_hub() -> void:
+	get_tree().change_scene_to_file("res://scenes/hub/hub.tscn")
 
 
 func _setup_gates() -> void:
@@ -61,13 +75,13 @@ func _setup_gates() -> void:
 func _spawn_player() -> void:
 	var bike_scene: PackedScene = preload("res://scenes/bike/bike.tscn")
 	_player_bike = bike_scene.instantiate()
+	add_child(_player_bike)
 
+	# Set position after adding to tree
 	if spawn_point:
 		_player_bike.global_position = spawn_point.global_position
 	else:
 		_player_bike.global_position = Vector3(0, 1, 0)
-
-	add_child(_player_bike)
 
 
 func _start_stage() -> void:

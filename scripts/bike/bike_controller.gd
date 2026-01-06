@@ -12,6 +12,7 @@ const BASE_JUMP_FORCE: float = 8.0
 const GRAVITY: float = 30.0
 const FRICTION: float = 8.0
 const AIR_FRICTION: float = 0.5
+const STEERING_RETURN_SPEED: float = 5.0  # How fast bike aligns to camera when not steering
 
 # Current stats (set from BikeData)
 var max_speed: float = 20.0
@@ -23,7 +24,7 @@ var jump_efficiency: float = 1.0
 # State
 var _current_speed: float = 0.0
 var _is_grounded: bool = false
-var _forward_direction: Vector3 = Vector3.FORWARD
+var _forward_direction: Vector3 = Vector3(0, 0, -1)  # -Z is forward
 var _camera_yaw: float = 0.0
 
 # Node references
@@ -69,8 +70,8 @@ func _handle_mouse_look(event: InputEventMouseMotion) -> void:
 	var sensitivity: float = 0.002
 	_camera_yaw -= event.relative.x * sensitivity
 
-	# Update forward direction based on camera yaw
-	_forward_direction = Vector3(sin(_camera_yaw), 0, cos(_camera_yaw)).normalized()
+	# Update forward direction based on camera yaw (negative Z is forward in Godot)
+	_forward_direction = Vector3(-sin(_camera_yaw), 0, -cos(_camera_yaw)).normalized()
 
 	# Rotate camera pivot
 	_camera_pivot.rotation.y = _camera_yaw
@@ -110,16 +111,20 @@ func _handle_input(delta: float) -> void:
 	# Steering (A/D) - only when moving
 	if _current_speed > 0.1:
 		var turn_input: float = Input.get_axis("steer_right", "steer_left")
-		var turn_amount: float = turn_input * BASE_TURN_SPEED * handling_multiplier * delta
 
-		# Rotate the bike's facing direction
-		var current_rotation: float = atan2(_forward_direction.x, _forward_direction.z)
-		current_rotation += turn_amount
-		_forward_direction = Vector3(sin(current_rotation), 0, cos(current_rotation)).normalized()
+		if abs(turn_input) > 0.1:
+			# Active steering - rotate around Y axis
+			var turn_amount: float = turn_input * BASE_TURN_SPEED * handling_multiplier * delta
+			_forward_direction = _forward_direction.rotated(Vector3.UP, turn_amount)
+		else:
+			# No steering input - lerp back to camera direction
+			var camera_forward: Vector3 = Vector3(-sin(_camera_yaw), 0, -cos(_camera_yaw)).normalized()
+			_forward_direction = _forward_direction.lerp(camera_forward, STEERING_RETURN_SPEED * delta)
 
-		# Visually rotate the mesh to match movement direction
-		if _mesh:
-			_mesh.rotation.y = current_rotation
+	# Visually rotate the mesh to match movement direction
+	if _mesh and _current_speed > 0.1:
+		var target_angle: float = atan2(-_forward_direction.x, -_forward_direction.z)
+		_mesh.rotation.y = target_angle
 
 
 func _apply_gravity(delta: float) -> void:

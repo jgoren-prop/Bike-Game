@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://test_stage_001"]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/systems/stage_base.gd" id="1_stage_base"]
 
@@ -9,10 +9,28 @@ size = Vector3(20, 1, 100)
 size = Vector3(20, 1, 100)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.3, 0.5, 0.3, 1)
+albedo_color = Color(0.25, 0.25, 0.28, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_stripe"]
+size = Vector3(0.3, 0.02, 4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stripe"]
+albedo_color = Color(1, 1, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_edge"]
+size = Vector3(0.5, 0.1, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_edge"]
+albedo_color = Color(1, 0.8, 0, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_gate"]
 size = Vector3(6, 4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_finish"]
+size = Vector3(10, 3, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_finish"]
+albedo_color = Color(1, 1, 1, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_fall"]
 size = Vector3(200, 1, 200)
@@ -32,6 +50,69 @@ shape = SubResource("BoxShape3D_ground")
 mesh = SubResource("BoxMesh_ground")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 
+[node name="LeftEdge" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 0.55, 0)
+mesh = SubResource("BoxMesh_edge")
+surface_material_override/0 = SubResource("StandardMaterial3D_edge")
+
+[node name="RightEdge" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.75, 0.55, 0)
+mesh = SubResource("BoxMesh_edge")
+surface_material_override/0 = SubResource("StandardMaterial3D_edge")
+
+[node name="CenterStripes" type="Node3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0)
+
+[node name="Stripe1" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -45)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe2" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -35)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe3" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -25)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe4" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -15)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe5" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe6" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe7" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 15)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe8" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 25)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe9" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 35)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
+[node name="Stripe10" type="MeshInstance3D" parent="Ground/CenterStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 45)
+mesh = SubResource("BoxMesh_stripe")
+surface_material_override/0 = SubResource("StandardMaterial3D_stripe")
+
 [node name="SpawnPoint" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
@@ -47,6 +128,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 90)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="FinishGate"]
 shape = SubResource("BoxShape3D_gate")
 
+[node name="FinishVisual" type="MeshInstance3D" parent="FinishGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_finish")
+surface_material_override/0 = SubResource("StandardMaterial3D_finish")
+
 [node name="FallPlane" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -20, 45)
 
@@ -56,11 +142,3 @@ shape = SubResource("BoxShape3D_fall")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 10, 0)
 shadow_enabled = true
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-
-[node name="FinishVisual" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 90)
-
-[node name="StartVisual" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 2)
