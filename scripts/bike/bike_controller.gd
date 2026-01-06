@@ -24,8 +24,8 @@ var jump_efficiency: float = 1.0
 # State
 var _current_speed: float = 0.0
 var _is_grounded: bool = false
-var _forward_direction: Vector3 = Vector3(0, 0, -1)  # -Z is forward
-var _camera_yaw: float = 0.0
+var _forward_direction: Vector3 = Vector3(0, 0, 1)  # Start facing +Z (toward goals)
+var _camera_yaw: float = PI  # 180 degrees - facing +Z
 
 # Node references
 @onready var _mesh: MeshInstance3D = $MeshInstance3D
@@ -40,6 +40,10 @@ signal fell_off
 func _ready() -> void:
 	_load_stats_from_bike_data()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	# Set initial camera rotation to match forward direction
+	_camera_pivot.rotation.y = _camera_yaw
+	if _mesh:
+		_mesh.rotation.y = atan2(-_forward_direction.x, -_forward_direction.z)
 
 
 func _load_stats_from_bike_data() -> void:
@@ -107,6 +111,11 @@ func _handle_input(delta: float) -> void:
 	if Input.is_action_pressed("brake"):
 		_current_speed -= BASE_BRAKE_FORCE * delta
 		_current_speed = max(_current_speed, 0.0)
+
+	# Jumping (Space) - only when grounded
+	if Input.is_action_just_pressed("jump") and _is_grounded:
+		var jump_power: float = BASE_JUMP_FORCE * jump_efficiency
+		velocity.y = jump_power
 
 	# Steering (A/D) - only when moving
 	if _current_speed > 0.1:
