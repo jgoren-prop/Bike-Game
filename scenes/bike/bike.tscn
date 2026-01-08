@@ -1,161 +1,206 @@
-[gd_scene load_steps=19 format=3 uid="uid://buxj72q75k38i"]
+[gd_scene load_steps=23 format=3 uid="uid://buxj72q75k38i"]
 
 [ext_resource type="Script" uid="uid://48tv28sjad6l" path="res://scripts/bike/bike_controller.gd" id="1_bike_ctrl"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
-size = Vector3(0.4, 0.5805664, 1.4)
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_bike"]
+friction = 0.8
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_frame_main"]
-top_radius = 0.04
-bottom_radius = 0.04
-height = 1.0
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(0.4, 0.9, 1.9)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_frame_thick"]
+top_radius = 0.045
+bottom_radius = 0.045
+height = 0.65
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frame"]
-albedo_color = Color(0.1, 0.1, 0.12, 1)
-metallic = 0.8
-roughness = 0.3
+albedo_color = Color(0.95, 0.75, 0.1, 1)
+metallic = 0.4
+roughness = 0.5
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_frame_down"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_frame_thin"]
 top_radius = 0.035
 bottom_radius = 0.035
-height = 0.7
+height = 0.55
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_frame_short"]
+top_radius = 0.04
+bottom_radius = 0.04
+height = 0.4
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_seatpost"]
-top_radius = 0.02
-bottom_radius = 0.02
-height = 0.25
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_chrome"]
-albedo_color = Color(0.85, 0.85, 0.9, 1)
-metallic = 1.0
-roughness = 0.1
-
-[sub_resource type="BoxMesh" id="BoxMesh_seat"]
-size = Vector3(0.15, 0.06, 0.25)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_seat"]
-albedo_color = Color(0.2, 0.08, 0.05, 1)
-roughness = 0.7
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_fork"]
 top_radius = 0.025
 bottom_radius = 0.025
-height = 0.5
+height = 0.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dark"]
+albedo_color = Color(0.15, 0.15, 0.18, 1)
+metallic = 0.3
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_seat"]
+size = Vector3(0.12, 0.05, 0.22)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_headtube"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.18
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_fork"]
+top_radius = 0.03
+bottom_radius = 0.025
+height = 0.55
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_handlebar"]
 top_radius = 0.02
 bottom_radius = 0.02
-height = 0.5
+height = 0.4
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_accent"]
-albedo_color = Color(0.9, 0.2, 0.1, 1)
-metallic = 0.3
-roughness = 0.4
+[sub_resource type="CylinderMesh" id="CylinderMesh_grip"]
+top_radius = 0.028
+bottom_radius = 0.028
+height = 0.1
 
 [sub_resource type="TorusMesh" id="TorusMesh_tire"]
 inner_radius = 0.28
 outer_radius = 0.38
-rings = 24
+rings = 16
 ring_segments = 12
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tire"]
-albedo_color = Color(0.15, 0.15, 0.15, 1)
-roughness = 0.9
+albedo_color = Color(0.12, 0.12, 0.12, 1)
+roughness = 0.95
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_wheel"]
-top_radius = 0.35
-bottom_radius = 0.35
-height = 0.12
-radial_segments = 24
+[sub_resource type="CylinderMesh" id="CylinderMesh_hub"]
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.1
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_silver"]
+albedo_color = Color(0.6, 0.6, 0.65, 1)
+metallic = 0.8
+roughness = 0.3
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_spoke"]
-top_radius = 0.02
-bottom_radius = 0.02
+top_radius = 0.015
+bottom_radius = 0.015
 height = 0.5
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_pedal_arm"]
-top_radius = 0.015
-bottom_radius = 0.015
-height = 0.18
+top_radius = 0.018
+bottom_radius = 0.018
+height = 0.16
 
 [sub_resource type="BoxMesh" id="BoxMesh_pedal"]
 size = Vector3(0.1, 0.02, 0.06)
 
 [node name="Bike" type="RigidBody3D"]
 mass = 60.0
+physics_material_override = SubResource("PhysicsMaterial_bike")
 linear_damp = 0.2
 angular_damp = 0.8
 script = ExtResource("1_bike_ctrl")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3597168, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
 shape = SubResource("BoxShape3D_body")
 
 [node name="BikeModel" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.031853057, 0)
 
-[node name="FrameMain" type="MeshInstance3D" parent="BikeModel"]
-transform = Transform3D(1, 0, 0, 0, 0.819, 0.574, 0, -0.574, 0.819, 0, 0.55, 0.15)
-mesh = SubResource("CylinderMesh_frame_main")
+[node name="TopTube" type="MeshInstance3D" parent="BikeModel"]
+transform = Transform3D(0.99999994, 0, 0, 0, 0.7750314, 0.38686043, 0, -0.33759063, 0.8881437, 0, 0.56256706, 0.018081252)
+mesh = SubResource("CylinderMesh_frame_thick")
 surface_material_override/0 = SubResource("StandardMaterial3D_frame")
 
-[node name="FrameDown" type="MeshInstance3D" parent="BikeModel"]
-transform = Transform3D(1, 0, 0, 0, 0.574, -0.819, 0, 0.819, 0.574, 0, 0.35, 0.35)
-mesh = SubResource("CylinderMesh_frame_down")
+[node name="DownTube" type="MeshInstance3D" parent="BikeModel"]
+transform = Transform3D(1, 0, 0, 0, 0.37350622, -0.57841545, 0, 0.64691275, 0.33395815, 0, 0.42, 0.32)
+mesh = SubResource("CylinderMesh_frame_thick")
 surface_material_override/0 = SubResource("StandardMaterial3D_frame")
 
-[node name="FrameRear" type="MeshInstance3D" parent="BikeModel"]
-transform = Transform3D(1, 0, 0, 0, 0.707, -0.707, 0, 0.707, 0.707, 0, 0.4, -0.25)
-mesh = SubResource("CylinderMesh_frame_down")
+[node name="SeatTube" type="MeshInstance3D" parent="BikeModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -0.15)
+mesh = SubResource("CylinderMesh_frame_thin")
 surface_material_override/0 = SubResource("StandardMaterial3D_frame")
 
-[node name="FrameStay" type="MeshInstance3D" parent="BikeModel"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, -0.25)
-mesh = SubResource("CylinderMesh_frame_down")
+[node name="ChainStayLeft" type="MeshInstance3D" parent="BikeModel"]
+transform = Transform3D(1, 0, 0, 0, 0.98, -0.17, 0, 0.17, 0.98, -0.05, 0.22, -0.38)
+mesh = SubResource("CylinderMesh_frame_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="ChainStayRight" type="MeshInstance3D" parent="BikeModel"]
+transform = Transform3D(1, 0, 0, 0, 0.98, -0.17, 0, 0.17, 0.98, 0.05, 0.22, -0.38)
+mesh = SubResource("CylinderMesh_frame_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="SeatStayLeft" type="MeshInstance3D" parent="BikeModel"]
+transform = Transform3D(1, 0, 0, 0, 0.6, -0.8, 0, 0.8, 0.6, -0.05, 0.48, -0.38)
+mesh = SubResource("CylinderMesh_frame_short")
+surface_material_override/0 = SubResource("StandardMaterial3D_frame")
+
+[node name="SeatStayRight" type="MeshInstance3D" parent="BikeModel"]
+transform = Transform3D(1, 0, 0, 0, 0.6, -0.8, 0, 0.8, 0.6, 0.05, 0.48, -0.38)
+mesh = SubResource("CylinderMesh_frame_short")
 surface_material_override/0 = SubResource("StandardMaterial3D_frame")
 
 [node name="SeatPost" type="MeshInstance3D" parent="BikeModel"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, -0.15)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.78, -0.15)
 mesh = SubResource("CylinderMesh_seatpost")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
 [node name="Seat" type="MeshInstance3D" parent="BikeModel"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.87, -0.12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -0.12)
 mesh = SubResource("BoxMesh_seat")
-surface_material_override/0 = SubResource("StandardMaterial3D_seat")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
 [node name="FrontAssembly" type="Node3D" parent="BikeModel"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.65)
 
-[node name="ForkLeft" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
-transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, -0.06, 0.35, 0.05)
-mesh = SubResource("CylinderMesh_fork")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
-
-[node name="ForkRight" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
-transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 0.06, 0.35, 0.05)
-mesh = SubResource("CylinderMesh_fork")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
-
-[node name="Stem" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
-transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 0, 0.62, 0.12)
-mesh = SubResource("CylinderMesh_fork")
+[node name="HeadTube" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
+transform = Transform3D(1, 0, 0, 0, 0.97, 0.26, 0, -0.26, 0.97, 0, 0.6, 0.08)
+mesh = SubResource("CylinderMesh_headtube")
 surface_material_override/0 = SubResource("StandardMaterial3D_frame")
 
+[node name="ForkLeft" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
+transform = Transform3D(1, 0, 0, 0, 0.97, 0.26, 0, -0.26, 0.97, -0.06, 0.35, 0.04)
+mesh = SubResource("CylinderMesh_fork")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
+
+[node name="ForkRight" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
+transform = Transform3D(1, 0, 0, 0, 0.97, 0.26, 0, -0.26, 0.97, 0.06, 0.35, 0.04)
+mesh = SubResource("CylinderMesh_fork")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
+
+[node name="ForkBridge" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0.52, 0.05)
+mesh = SubResource("CylinderMesh_seatpost")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
+
 [node name="HandlebarCenter" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0.78, 0.18)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0.82, 0.1)
 mesh = SubResource("CylinderMesh_handlebar")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
-[node name="HandleGripLeft" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -0.3, 0.78, 0.18)
-mesh = SubResource("CylinderMesh_fork")
-surface_material_override/0 = SubResource("StandardMaterial3D_accent")
+[node name="HandlebarLeft" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
+transform = Transform3D(0, 1, 0, 0, 0, -1, -1, 0, 0, -0.2, 0.82, 0.02)
+mesh = SubResource("CylinderMesh_grip")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
-[node name="HandleGripRight" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.3, 0.78, 0.18)
-mesh = SubResource("CylinderMesh_fork")
-surface_material_override/0 = SubResource("StandardMaterial3D_accent")
+[node name="HandlebarRight" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
+transform = Transform3D(0, 1, 0, 0, 0, -1, -1, 0, 0, 0.2, 0.82, 0.02)
+mesh = SubResource("CylinderMesh_grip")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
+
+[node name="GripLeft" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -0.26, 0.82, 0.02)
+mesh = SubResource("CylinderMesh_grip")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
+
+[node name="GripRight" type="MeshInstance3D" parent="BikeModel/FrontAssembly"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.26, 0.82, 0.02)
+mesh = SubResource("CylinderMesh_grip")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
 [node name="FrontWheel" type="Node3D" parent="BikeModel/FrontAssembly"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
@@ -167,28 +212,28 @@ surface_material_override/0 = SubResource("StandardMaterial3D_tire")
 
 [node name="Hub" type="MeshInstance3D" parent="BikeModel/FrontAssembly/FrontWheel"]
 transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("CylinderMesh_wheel")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+mesh = SubResource("CylinderMesh_hub")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="Spoke1" type="MeshInstance3D" parent="BikeModel/FrontAssembly/FrontWheel"]
 transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_spoke")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="Spoke2" type="MeshInstance3D" parent="BikeModel/FrontAssembly/FrontWheel"]
 transform = Transform3D(0, 0.707, 0.707, -1, 0, 0, 0, -0.707, 0.707, 0, 0, 0)
 mesh = SubResource("CylinderMesh_spoke")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="Spoke3" type="MeshInstance3D" parent="BikeModel/FrontAssembly/FrontWheel"]
 transform = Transform3D(0, 0, 1, -1, 0, 0, 0, -1, 0, 0, 0, 0)
 mesh = SubResource("CylinderMesh_spoke")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="Spoke4" type="MeshInstance3D" parent="BikeModel/FrontAssembly/FrontWheel"]
 transform = Transform3D(0, -0.707, 0.707, -1, 0, 0, 0, -0.707, -0.707, 0, 0, 0)
 mesh = SubResource("CylinderMesh_spoke")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="RearWheel" type="Node3D" parent="BikeModel"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, -0.6)
@@ -200,48 +245,48 @@ surface_material_override/0 = SubResource("StandardMaterial3D_tire")
 
 [node name="Hub" type="MeshInstance3D" parent="BikeModel/RearWheel"]
 transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("CylinderMesh_wheel")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+mesh = SubResource("CylinderMesh_hub")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="Spoke1" type="MeshInstance3D" parent="BikeModel/RearWheel"]
 transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_spoke")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="Spoke2" type="MeshInstance3D" parent="BikeModel/RearWheel"]
 transform = Transform3D(0, 0.707, 0.707, -1, 0, 0, 0, -0.707, 0.707, 0, 0, 0)
 mesh = SubResource("CylinderMesh_spoke")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="Spoke3" type="MeshInstance3D" parent="BikeModel/RearWheel"]
 transform = Transform3D(0, 0, 1, -1, 0, 0, 0, -1, 0, 0, 0, 0)
 mesh = SubResource("CylinderMesh_spoke")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="Spoke4" type="MeshInstance3D" parent="BikeModel/RearWheel"]
 transform = Transform3D(0, -0.707, 0.707, -1, 0, 0, 0, -0.707, -0.707, 0, 0, 0)
 mesh = SubResource("CylinderMesh_spoke")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_silver")
 
 [node name="PedalArmLeft" type="MeshInstance3D" parent="BikeModel"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -0.12, 0.2, 0.05)
+transform = Transform3D(0, 0.99998754, 0.0049915863, 0, 0.0049915863, -0.99998754, -1, 0, 0, -0.20054415, 0.3785374, 0.05)
 mesh = SubResource("CylinderMesh_pedal_arm")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
 [node name="PedalLeft" type="MeshInstance3D" parent="BikeModel/PedalArmLeft"]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.1, 0)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.09, 0)
 mesh = SubResource("BoxMesh_pedal")
-surface_material_override/0 = SubResource("StandardMaterial3D_accent")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
 [node name="PedalArmRight" type="MeshInstance3D" parent="BikeModel"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.12, 0.2, 0.05)
+transform = Transform3D(0, -0.9930274, 0.11788402, 0, 0.11788402, 0.9930274, -1, 0, 0, 0.1, 0.3593918, 0.05)
 mesh = SubResource("CylinderMesh_pedal_arm")
-surface_material_override/0 = SubResource("StandardMaterial3D_chrome")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
 [node name="PedalRight" type="MeshInstance3D" parent="BikeModel/PedalArmRight"]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, -0.1, 0)
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, -0.09, 0)
 mesh = SubResource("BoxMesh_pedal")
-surface_material_override/0 = SubResource("StandardMaterial3D_accent")
+surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
 [node name="FrontWheelRay" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.65)

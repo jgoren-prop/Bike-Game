@@ -1,56 +1,36 @@
-[gd_scene load_steps=35 format=3 uid="uid://ctestpark001"]
+[gd_scene load_steps=33 format=3 uid="uid://ctestpark001"]
 
-[ext_resource type="Script" path="res://scripts/test/test_park.gd" id="1_park"]
-[ext_resource type="Script" path="res://scripts/systems/moving_platform.gd" id="2_moving"]
-[ext_resource type="Script" path="res://scripts/systems/swinging_obstacle.gd" id="3_swing"]
-[ext_resource type="Script" path="res://scripts/systems/rotating_barrier.gd" id="4_rotate"]
+[ext_resource type="Script" uid="uid://bcoo1uy45xbuf" path="res://scripts/test/test_park.gd" id="1_park"]
+[ext_resource type="Script" uid="uid://do6bx1vi82o46" path="res://scripts/systems/moving_platform.gd" id="2_moving"]
+[ext_resource type="Script" uid="uid://bc3fj2vma4hht" path="res://scripts/systems/swinging_obstacle.gd" id="3_swing"]
+[ext_resource type="Script" uid="uid://ck8iwd0ujmkdg" path="res://scripts/systems/rotating_barrier.gd" id="4_rotate"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(200, 0.5, 200)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(200, 0.5, 200)
 
 [sub_resource type="StandardMaterial3D" id="Mat_grass"]
 albedo_color = Color(0.2, 0.35, 0.15, 1)
 roughness = 0.95
 
-[sub_resource type="StandardMaterial3D" id="Mat_concrete"]
-albedo_color = Color(0.4, 0.4, 0.42, 1)
-roughness = 0.85
+[sub_resource type="BoxMesh" id="BoxMesh_gridline_x"]
+size = Vector3(200, 0.1, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gridline_z"]
+size = Vector3(0.3, 0.1, 200)
+
+[sub_resource type="StandardMaterial3D" id="Mat_gridline"]
+albedo_color = Color(0.35, 0.45, 0.3, 1)
+roughness = 0.9
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(200, 0.5, 200)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ramp_small"]
+size = Vector3(6, 0.3, 8)
 
 [sub_resource type="StandardMaterial3D" id="Mat_ramp"]
 albedo_color = Color(0.5, 0.35, 0.25, 1)
 roughness = 0.7
-
-[sub_resource type="StandardMaterial3D" id="Mat_rail"]
-albedo_color = Color(0.7, 0.7, 0.75, 1)
-metallic = 0.9
-roughness = 0.2
-
-[sub_resource type="StandardMaterial3D" id="Mat_halfpipe"]
-albedo_color = Color(0.3, 0.5, 0.6, 1)
-roughness = 0.6
-
-[sub_resource type="StandardMaterial3D" id="Mat_obstacle"]
-albedo_color = Color(0.8, 0.2, 0.2, 1)
-emission_enabled = true
-emission = Color(0.5, 0.1, 0.1, 1)
-emission_energy_multiplier = 0.5
-roughness = 0.5
-
-[sub_resource type="StandardMaterial3D" id="Mat_platform"]
-albedo_color = Color(0.3, 0.6, 0.3, 1)
-roughness = 0.6
-
-[sub_resource type="StandardMaterial3D" id="Mat_yellow"]
-albedo_color = Color(0.9, 0.8, 0.1, 1)
-emission_enabled = true
-emission = Color(0.4, 0.35, 0.05, 1)
-roughness = 0.5
-
-[sub_resource type="BoxMesh" id="BoxMesh_ramp_small"]
-size = Vector3(6, 0.3, 8)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ramp_small"]
 size = Vector3(6, 0.3, 8)
@@ -61,14 +41,29 @@ size = Vector3(8, 0.3, 12)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ramp_med"]
 size = Vector3(8, 0.3, 12)
 
+[sub_resource type="StandardMaterial3D" id="Mat_yellow"]
+albedo_color = Color(0.9, 0.8, 0.1, 1)
+roughness = 0.5
+emission_enabled = true
+emission = Color(0.4, 0.35, 0.05, 1)
+
 [sub_resource type="BoxMesh" id="BoxMesh_rail"]
 size = Vector3(0.4, 0.2, 15)
+
+[sub_resource type="StandardMaterial3D" id="Mat_rail"]
+albedo_color = Color(0.7, 0.7, 0.75, 1)
+metallic = 0.9
+roughness = 0.2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rail"]
 size = Vector3(0.4, 0.2, 15)
 
 [sub_resource type="BoxMesh" id="BoxMesh_halfpipe"]
 size = Vector3(5, 0.3, 30)
+
+[sub_resource type="StandardMaterial3D" id="Mat_halfpipe"]
+albedo_color = Color(0.3, 0.5, 0.6, 1)
+roughness = 0.6
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_halfpipe"]
 size = Vector3(5, 0.3, 30)
@@ -82,6 +77,10 @@ size = Vector3(20, 0.3, 30)
 [sub_resource type="BoxMesh" id="BoxMesh_platform"]
 size = Vector3(8, 0.5, 8)
 
+[sub_resource type="StandardMaterial3D" id="Mat_platform"]
+albedo_color = Color(0.3, 0.6, 0.3, 1)
+roughness = 0.6
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_platform"]
 size = Vector3(8, 0.5, 8)
 
@@ -89,6 +88,13 @@ size = Vector3(8, 0.5, 8)
 top_radius = 0.3
 bottom_radius = 0.3
 height = 6.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_obstacle"]
+albedo_color = Color(0.8, 0.2, 0.2, 1)
+roughness = 0.5
+emission_enabled = true
+emission = Color(0.5, 0.1, 0.1, 1)
+emission_energy_multiplier = 0.5
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
 size = Vector3(0.8, 6, 0.8)
@@ -102,6 +108,10 @@ radius = 5.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_pillar"]
 size = Vector3(1.5, 2, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_concrete"]
+albedo_color = Color(0.4, 0.4, 0.42, 1)
+roughness = 0.85
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_pillar"]
 size = Vector3(1.5, 2, 1.5)
@@ -126,6 +136,56 @@ surface_material_override/0 = SubResource("Mat_grass")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
 shape = SubResource("BoxShape3D_ground")
 
+[node name="GridX0" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
+mesh = SubResource("BoxMesh_gridline_x")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridX1" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, -5)
+mesh = SubResource("BoxMesh_gridline_x")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridX2" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 5)
+mesh = SubResource("BoxMesh_gridline_x")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridX3" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, -10)
+mesh = SubResource("BoxMesh_gridline_x")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridX4" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 10)
+mesh = SubResource("BoxMesh_gridline_x")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridZ0" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
+mesh = SubResource("BoxMesh_gridline_z")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridZ1" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.28, 0)
+mesh = SubResource("BoxMesh_gridline_z")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridZ2" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.28, 0)
+mesh = SubResource("BoxMesh_gridline_z")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridZ3" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.28, 0)
+mesh = SubResource("BoxMesh_gridline_z")
+surface_material_override/0 = SubResource("Mat_gridline")
+
+[node name="GridZ4" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.28, 0)
+mesh = SubResource("BoxMesh_gridline_z")
+surface_material_override/0 = SubResource("Mat_gridline")
+
 [node name="SpawnPoint" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
@@ -133,57 +193,67 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 20)
 
 [node name="AreaSpawn" type="Marker3D" parent="RampArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -15)
 
-[node name="SmallRamp1" type="StaticBody3D" parent="RampArea"]
-transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 0, 0.5, 0)
+[node name="Ramp15deg" type="StaticBody3D" parent="RampArea"]
+transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, -15, 0.5, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="RampArea/SmallRamp1"]
-mesh = SubResource("BoxMesh_ramp_small")
-surface_material_override/0 = SubResource("Mat_ramp")
-
-[node name="Collision" type="CollisionShape3D" parent="RampArea/SmallRamp1"]
-shape = SubResource("BoxShape3D_ramp_small")
-
-[node name="SmallRamp2" type="StaticBody3D" parent="RampArea"]
-transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, 0, 0.5, 16)
-
-[node name="Mesh" type="MeshInstance3D" parent="RampArea/SmallRamp2"]
-mesh = SubResource("BoxMesh_ramp_small")
-surface_material_override/0 = SubResource("Mat_ramp")
-
-[node name="Collision" type="CollisionShape3D" parent="RampArea/SmallRamp2"]
-shape = SubResource("BoxShape3D_ramp_small")
-
-[node name="MediumRamp1" type="StaticBody3D" parent="RampArea"]
-transform = Transform3D(1, 0, 0, 0, 0.94, 0.342, 0, -0.342, 0.94, 12, 0.8, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="RampArea/MediumRamp1"]
+[node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp15deg"]
 mesh = SubResource("BoxMesh_ramp_med")
 surface_material_override/0 = SubResource("Mat_ramp")
 
-[node name="Collision" type="CollisionShape3D" parent="RampArea/MediumRamp1"]
+[node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp15deg"]
 shape = SubResource("BoxShape3D_ramp_med")
 
-[node name="SteepRamp" type="StaticBody3D" parent="RampArea"]
-transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, -10, 1.2, 8)
+[node name="Ramp30deg" type="StaticBody3D" parent="RampArea"]
+transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, 0, 0.8, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="RampArea/SteepRamp"]
+[node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp30deg"]
 mesh = SubResource("BoxMesh_ramp_med")
 surface_material_override/0 = SubResource("Mat_ramp")
 
-[node name="Collision" type="CollisionShape3D" parent="RampArea/SteepRamp"]
+[node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp30deg"]
 shape = SubResource("BoxShape3D_ramp_med")
 
-[node name="JumpRamp" type="StaticBody3D" parent="RampArea"]
-transform = Transform3D(1, 0, 0, 0, 0.819, 0.574, 0, -0.574, 0.819, 0, 1.5, 30)
+[node name="Ramp45deg" type="StaticBody3D" parent="RampArea"]
+transform = Transform3D(1, 0, 0, 0, 0.707, 0.707, 0, -0.707, 0.707, 15, 1.2, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="RampArea/JumpRamp"]
-mesh = SubResource("BoxMesh_ramp_small")
+[node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp45deg"]
+mesh = SubResource("BoxMesh_ramp_med")
 surface_material_override/0 = SubResource("Mat_yellow")
 
-[node name="Collision" type="CollisionShape3D" parent="RampArea/JumpRamp"]
-shape = SubResource("BoxShape3D_ramp_small")
+[node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp45deg"]
+shape = SubResource("BoxShape3D_ramp_med")
+
+[node name="Ramp60deg" type="StaticBody3D" parent="RampArea"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866, 0, -0.866, 0.5, -15, 1.8, 20)
+
+[node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp60deg"]
+mesh = SubResource("BoxMesh_ramp_med")
+surface_material_override/0 = SubResource("Mat_ramp")
+
+[node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp60deg"]
+shape = SubResource("BoxShape3D_ramp_med")
+
+[node name="Ramp75deg" type="StaticBody3D" parent="RampArea"]
+transform = Transform3D(1, 0, 0, 0, 0.259, 0.966, 0, -0.966, 0.259, 0, 2.5, 20)
+
+[node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp75deg"]
+mesh = SubResource("BoxMesh_ramp_med")
+surface_material_override/0 = SubResource("Mat_ramp")
+
+[node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp75deg"]
+shape = SubResource("BoxShape3D_ramp_med")
+
+[node name="Ramp90deg" type="StaticBody3D" parent="RampArea"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 15, 3, 20)
+
+[node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp90deg"]
+mesh = SubResource("BoxMesh_ramp_med")
+surface_material_override/0 = SubResource("Mat_yellow")
+
+[node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp90deg"]
+shape = SubResource("BoxShape3D_ramp_med")
 
 [node name="RailArea" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, 20)
@@ -202,7 +272,7 @@ surface_material_override/0 = SubResource("Mat_rail")
 shape = SubResource("BoxShape3D_rail")
 
 [node name="MedRail" type="StaticBody3D" parent="RailArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.0, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, 10)
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/MedRail"]
 mesh = SubResource("BoxMesh_rail")
@@ -338,7 +408,6 @@ surface_material_override/0 = SubResource("Mat_halfpipe")
 shape = SubResource("BoxShape3D_halfpipe")
 
 [node name="HalfPipeFloor" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/HalfPipeFloor"]
 mesh = SubResource("BoxMesh_halfpipe_floor")
@@ -387,7 +456,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -15)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 script = ExtResource("2_moving")
 move_distance = Vector3(15, 0, 0)
-move_duration = 3.0
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/MovingPlatform1"]
 mesh = SubResource("BoxMesh_platform")
@@ -440,8 +508,6 @@ shape = SubResource("BoxShape3D_hitbox")
 [node name="SwingingObstacle2" type="Node3D" parent="ObstacleArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 5, 25)
 script = ExtResource("3_swing")
-swing_angle = 60.0
-swing_speed = 2.0
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/SwingingObstacle2"]
 mesh = SubResource("CylinderMesh_swing")
@@ -458,7 +524,6 @@ script = ExtResource("4_rotate")
 rotation_speed = 1.5
 
 [node name="Arm1" type="MeshInstance3D" parent="ObstacleArea/RotatingBarrier1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("BoxMesh_barrier_arm")
 surface_material_override/0 = SubResource("Mat_obstacle")
 

@@ -45,10 +45,11 @@ res://
 - Prefer composition over inheritance
 
 ## Controls
-- **Shift**: Throttle (bike moves forward when held)
-- **W**: Tilt forward (lean bike forward)
+- **W**: Throttle + Tilt forward (bike moves forward and leans forward)
 - **S**: Brake / Reverse + Tilt back
 - **A/D**: Steer left/right
+- **Shift**: Drift mode (hold to disable grip and slide freely)
+- **R**: Reset bike in place (uprights the bike without moving it)
 - **Mouse**: Controls camera orientation; forward direction follows mouse look
 
 ## Game Architecture

@@ -12,26 +12,31 @@ var _bike: BikeController = null
 @onready var _engine_force_slider: HSlider = $Panel/ScrollContainer/VBox/MovementSection/AccelerationSlider
 @onready var _brake_slider: HSlider = $Panel/ScrollContainer/VBox/MovementSection/BrakeSlider
 
-# Physics sliders (repurposed from old sections)
+# Physics sliders
 @onready var _mass_slider: HSlider = $Panel/ScrollContainer/VBox/MomentumSection/MassSlider
 @onready var _linear_damp_slider: HSlider = $Panel/ScrollContainer/VBox/MomentumSection/DragSlider
 
 # Steering/Balance sliders
 @onready var _steer_torque_slider: HSlider = $Panel/ScrollContainer/VBox/SteeringSection/TurnSpeedSlider
 @onready var _lean_torque_slider: HSlider = $Panel/ScrollContainer/VBox/SteeringSection/TurnInertiaSlider
-@onready var _roll_stab_slider: HSlider = $Panel/ScrollContainer/VBox/SteeringSection/DriftSlider
-@onready var _pitch_stab_slider: HSlider = $Panel/ScrollContainer/VBox/SteeringSection/AutoAlignSlider
+
+# Arcade handling sliders
+@onready var _vel_align_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/VelAlignSlider
+@onready var _drift_grip_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftGripSlider
+@onready var _drift_kickout_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftKickoutSlider
+@onready var _drift_steer_boost_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftSteerBoostSlider
+@onready var _pitch_stab_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/PitchStabSlider
 
 # Jump slider
 @onready var _jump_slider: HSlider = $Panel/ScrollContainer/VBox/FrictionSection/JumpSlider
 
 # Arcade feel sliders
 @onready var _angular_damp_slider: HSlider = $Panel/ScrollContainer/VBox/ArcadeSection/AngularDampSlider
-@onready var _vel_align_slider: HSlider = $Panel/ScrollContainer/VBox/ArcadeSection/VelAlignSlider
 @onready var _air_pitch_slider: HSlider = $Panel/ScrollContainer/VBox/ArcadeSection/AirPitchSlider
 @onready var _air_yaw_slider: HSlider = $Panel/ScrollContainer/VBox/ArcadeSection/AirYawSlider
 @onready var _fov_boost_slider: HSlider = $Panel/ScrollContainer/VBox/ArcadeSection/FovBoostSlider
 @onready var _landing_squash_slider: HSlider = $Panel/ScrollContainer/VBox/ArcadeSection/LandingSquashSlider
+@onready var _disable_visual_checkbox: CheckBox = %DisableVisualCheckbox
 
 # Camera sliders
 @onready var _base_fov_slider: HSlider = $Panel/ScrollContainer/VBox/CameraSection/BaseFovSlider
@@ -47,13 +52,18 @@ var _bike: BikeController = null
 @onready var _linear_damp_value: Label = $Panel/ScrollContainer/VBox/MomentumSection/DragValue
 @onready var _steer_torque_value: Label = $Panel/ScrollContainer/VBox/SteeringSection/TurnSpeedValue
 @onready var _lean_torque_value: Label = $Panel/ScrollContainer/VBox/SteeringSection/TurnInertiaValue
-@onready var _roll_stab_value: Label = $Panel/ScrollContainer/VBox/SteeringSection/DriftValue
-@onready var _pitch_stab_value: Label = $Panel/ScrollContainer/VBox/SteeringSection/AutoAlignValue
+
+# Arcade handling value labels
+@onready var _vel_align_value: Label = $Panel/ScrollContainer/VBox/GripSection/VelAlignValue
+@onready var _drift_grip_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftGripValue
+@onready var _drift_kickout_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftKickoutValue
+@onready var _drift_steer_boost_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftSteerBoostValue
+@onready var _pitch_stab_value: Label = $Panel/ScrollContainer/VBox/GripSection/PitchStabValue
+
 @onready var _jump_value: Label = $Panel/ScrollContainer/VBox/FrictionSection/JumpValue
 
 # Arcade value labels
 @onready var _angular_damp_value: Label = $Panel/ScrollContainer/VBox/ArcadeSection/AngularDampValue
-@onready var _vel_align_value: Label = $Panel/ScrollContainer/VBox/ArcadeSection/VelAlignValue
 @onready var _air_pitch_value: Label = $Panel/ScrollContainer/VBox/ArcadeSection/AirPitchValue
 @onready var _air_yaw_value: Label = $Panel/ScrollContainer/VBox/ArcadeSection/AirYawValue
 @onready var _fov_boost_value: Label = $Panel/ScrollContainer/VBox/ArcadeSection/FovBoostValue
@@ -66,9 +76,13 @@ var _bike: BikeController = null
 @onready var _camera_angle_value: Label = $Panel/ScrollContainer/VBox/CameraSection/CameraAngleValue
 
 
+@onready var _copy_button: Button = $Panel/ScrollContainer/VBox/CopyButton
+
 func _ready() -> void:
 	_panel.visible = false
 	_connect_sliders()
+	if _copy_button:
+		_copy_button.pressed.connect(_on_copy_pressed)
 
 
 func _process(_delta: float) -> void:
@@ -132,8 +146,15 @@ func _connect_sliders() -> void:
 		_steer_torque_slider.value_changed.connect(_on_steer_torque_changed)
 	if _lean_torque_slider:
 		_lean_torque_slider.value_changed.connect(_on_lean_torque_changed)
-	if _roll_stab_slider:
-		_roll_stab_slider.value_changed.connect(_on_roll_stab_changed)
+	# Arcade handling sliders
+	if _vel_align_slider:
+		_vel_align_slider.value_changed.connect(_on_vel_align_changed)
+	if _drift_grip_slider:
+		_drift_grip_slider.value_changed.connect(_on_drift_grip_changed)
+	if _drift_kickout_slider:
+		_drift_kickout_slider.value_changed.connect(_on_drift_kickout_changed)
+	if _drift_steer_boost_slider:
+		_drift_steer_boost_slider.value_changed.connect(_on_drift_steer_boost_changed)
 	if _pitch_stab_slider:
 		_pitch_stab_slider.value_changed.connect(_on_pitch_stab_changed)
 	if _jump_slider:
@@ -141,8 +162,6 @@ func _connect_sliders() -> void:
 	# Arcade sliders
 	if _angular_damp_slider:
 		_angular_damp_slider.value_changed.connect(_on_angular_damp_changed)
-	if _vel_align_slider:
-		_vel_align_slider.value_changed.connect(_on_vel_align_changed)
 	if _air_pitch_slider:
 		_air_pitch_slider.value_changed.connect(_on_air_pitch_changed)
 	if _air_yaw_slider:
@@ -151,6 +170,8 @@ func _connect_sliders() -> void:
 		_fov_boost_slider.value_changed.connect(_on_fov_boost_changed)
 	if _landing_squash_slider:
 		_landing_squash_slider.value_changed.connect(_on_landing_squash_changed)
+	if _disable_visual_checkbox:
+		_disable_visual_checkbox.toggled.connect(_on_disable_visual_toggled)
 	# Camera sliders
 	if _base_fov_slider:
 		_base_fov_slider.value_changed.connect(_on_base_fov_changed)
@@ -187,9 +208,19 @@ func _sync_sliders_from_bike() -> void:
 	if _lean_torque_slider:
 		_lean_torque_slider.value = _bike.lean_torque
 		_update_value_label(_lean_torque_value, _bike.lean_torque)
-	if _roll_stab_slider:
-		_roll_stab_slider.value = _bike.roll_stabilization
-		_update_value_label(_roll_stab_value, _bike.roll_stabilization)
+	# Arcade handling sliders
+	if _vel_align_slider:
+		_vel_align_slider.value = _bike.velocity_alignment
+		_update_value_label(_vel_align_value, _bike.velocity_alignment)
+	if _drift_grip_slider:
+		_drift_grip_slider.value = _bike.drift_grip
+		_update_value_label(_drift_grip_value, _bike.drift_grip)
+	if _drift_kickout_slider:
+		_drift_kickout_slider.value = _bike.drift_kickout
+		_update_value_label(_drift_kickout_value, _bike.drift_kickout)
+	if _drift_steer_boost_slider:
+		_drift_steer_boost_slider.value = _bike.drift_steer_boost
+		_update_value_label(_drift_steer_boost_value, _bike.drift_steer_boost)
 	if _pitch_stab_slider:
 		_pitch_stab_slider.value = _bike.pitch_stabilization
 		_update_value_label(_pitch_stab_value, _bike.pitch_stabilization)
@@ -200,9 +231,6 @@ func _sync_sliders_from_bike() -> void:
 	if _angular_damp_slider:
 		_angular_damp_slider.value = _bike.angular_damp
 		_update_value_label(_angular_damp_value, _bike.angular_damp)
-	if _vel_align_slider:
-		_vel_align_slider.value = _bike.velocity_alignment
-		_update_value_label(_vel_align_value, _bike.velocity_alignment)
 	if _air_pitch_slider:
 		_air_pitch_slider.value = _bike.air_pitch_torque
 		_update_value_label(_air_pitch_value, _bike.air_pitch_torque)
@@ -215,6 +243,8 @@ func _sync_sliders_from_bike() -> void:
 	if _landing_squash_slider:
 		_landing_squash_slider.value = _bike.landing_squash_amount
 		_update_value_label(_landing_squash_value, _bike.landing_squash_amount)
+	if _disable_visual_checkbox:
+		_disable_visual_checkbox.button_pressed = _bike.disable_visual_effects
 	# Camera sliders
 	if _base_fov_slider:
 		_base_fov_slider.value = _bike.base_fov
@@ -279,10 +309,30 @@ func _on_lean_torque_changed(value: float) -> void:
 		_update_value_label(_lean_torque_value, value)
 
 
-func _on_roll_stab_changed(value: float) -> void:
+# === ARCADE HANDLING CALLBACKS ===
+
+func _on_vel_align_changed(value: float) -> void:
 	if _bike:
-		_bike.roll_stabilization = value
-		_update_value_label(_roll_stab_value, value)
+		_bike.velocity_alignment = value
+		_update_value_label(_vel_align_value, value)
+
+
+func _on_drift_grip_changed(value: float) -> void:
+	if _bike:
+		_bike.drift_grip = value
+		_update_value_label(_drift_grip_value, value)
+
+
+func _on_drift_kickout_changed(value: float) -> void:
+	if _bike:
+		_bike.drift_kickout = value
+		_update_value_label(_drift_kickout_value, value)
+
+
+func _on_drift_steer_boost_changed(value: float) -> void:
+	if _bike:
+		_bike.drift_steer_boost = value
+		_update_value_label(_drift_steer_boost_value, value)
 
 
 func _on_pitch_stab_changed(value: float) -> void:
@@ -303,12 +353,6 @@ func _on_angular_damp_changed(value: float) -> void:
 	if _bike:
 		_bike.angular_damp = value
 		_update_value_label(_angular_damp_value, value)
-
-
-func _on_vel_align_changed(value: float) -> void:
-	if _bike:
-		_bike.velocity_alignment = value
-		_update_value_label(_vel_align_value, value)
 
 
 func _on_air_pitch_changed(value: float) -> void:
@@ -333,6 +377,11 @@ func _on_landing_squash_changed(value: float) -> void:
 	if _bike:
 		_bike.landing_squash_amount = value
 		_update_value_label(_landing_squash_value, value)
+
+
+func _on_disable_visual_toggled(toggled_on: bool) -> void:
+	if _bike:
+		_bike.disable_visual_effects = toggled_on
 
 
 # === CAMERA CALLBACKS ===
@@ -363,3 +412,44 @@ func _on_camera_angle_changed(value: float) -> void:
 		_bike.camera_angle = value
 		_bike._camera.rotation.x = deg_to_rad(-value)  # Apply immediately
 		_update_value_label(_camera_angle_value, value, "°")
+
+
+func _on_copy_pressed() -> void:
+	if not _bike:
+		return
+
+	var text: String = "=== BIKE TUNING VALUES ===\n\n"
+	text += "MOVEMENT:\n"
+	text += "  Max Speed: %.1f\n" % _bike.max_speed
+	text += "  Acceleration: %.1fN\n" % _bike.engine_force
+	text += "  Brake Force: %.1fN\n" % _bike.brake_force
+	text += "\nMOMENTUM:\n"
+	text += "  Mass: %.1fkg\n" % _bike.mass
+	text += "  Drag: %.2f\n" % _bike.linear_damp
+	text += "\nSTEERING:\n"
+	text += "  Steer Torque: %.1f\n" % _bike.steer_torque
+	text += "  Lean Torque: %.1f\n" % _bike.lean_torque
+	text += "\nARCADE HANDLING:\n"
+	text += "  Velocity Alignment: %.2f\n" % _bike.velocity_alignment
+	text += "  Drift Grip: %.1f\n" % _bike.drift_grip
+	text += "  Drift Kickout: %.1f\n" % _bike.drift_kickout
+	text += "  Drift Steer Boost: %.1f\n" % _bike.drift_steer_boost
+	text += "  Pitch Stability: %.1f\n" % _bike.pitch_stabilization
+	text += "\nJUMP:\n"
+	text += "  Jump Force: %.1f\n" % _bike.jump_impulse
+	text += "\nARCADE FEEL:\n"
+	text += "  Angular Damping: %.1f\n" % _bike.angular_damp
+	text += "  Air Flip Power: %.1f\n" % _bike.air_pitch_torque
+	text += "  Air Spin Power: %.1f\n" % _bike.air_yaw_torque
+	text += "  Speed FOV Boost: %.1f\n" % _bike.fov_boost
+	text += "  Landing Squash: %.2f\n" % _bike.landing_squash_amount
+	text += "\nCAMERA:\n"
+	text += "  Field of View: %.1f\n" % _bike.base_fov
+	text += "  Camera Distance: %.1f\n" % _bike.camera_distance
+	text += "  Camera Height: %.1f\n" % _bike.camera_height
+	text += "  Camera Angle: %.1f°\n" % _bike.camera_angle
+
+	DisplayServer.clipboard_set(text)
+	_copy_button.text = "Copied!"
+	await get_tree().create_timer(1.0).timeout
+	_copy_button.text = "Copy Values"

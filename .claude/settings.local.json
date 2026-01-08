@@ -1,8 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch",
-      "Bash(grep -r \"collision_layer\\\\|collision_mask\\\\|physics\\\\|gravity\" \"C:\\\\Users\\\\Jgoren\\\\Documents\\\\GitHub\\\\Bike-Game\\\\scripts\\\\bike\"\" --include=\"*.gd \")"
+      "WebSearch"
     ]
   }
 }
