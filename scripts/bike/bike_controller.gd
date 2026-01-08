@@ -14,7 +14,7 @@ class_name BikeController
 @export var steer_torque: float = 600.0      # Yaw torque for turning
 @export var steer_speed_factor: float = 0.4  # Less steering at high speed
 
-# Balance/Lean (Trials-style: W/S = throttle + lean)
+# Balance/Lean (Trials-style: Shift = throttle, W/S = tilt)
 @export var lean_torque: float = 150.0       # Pitch torque from input
 @export var pitch_stabilization: float = 50.0 # Pitch stability when grounded
 @export var roll_stabilization: float = 100.0 # Roll stability (keep upright)
@@ -115,7 +115,8 @@ func _handle_mouse_look(event: InputEventMouseMotion) -> void:
 func _physics_process(delta: float) -> void:
 	_check_ground()
 
-	var throttle: float = Input.get_axis("brake", "accelerate")
+	var throttle: float = 1.0 if Input.is_action_pressed("throttle") else 0.0
+	var tilt: float = Input.get_axis("brake", "accelerate")  # W/S for tilt forward/back
 	var steer: float = Input.get_axis("steer_right", "steer_left")
 
 	# Get bike's forward direction (local +Z in world space, since front wheel is at +Z)
@@ -123,41 +124,35 @@ func _physics_process(delta: float) -> void:
 	var right: Vector3 = global_transform.basis.x
 
 	# === DRIVE FORCE ===
-	# Apply at rear wheel contact point for natural weight transfer
-	if throttle > 0:
+	# Apply at rear wheel contact point - only works when rear wheel is grounded (bike power comes from tires)
+	if throttle > 0 and _rear_grounded:
 		# Punchy acceleration - strong at low speed, tapering at high
 		var current_speed: float = linear_velocity.length()
 		var speed_ratio: float = clamp(current_speed / max_speed, 0.0, 1.0)
 		var accel_curve: float = 1.0 - (speed_ratio * speed_ratio * 0.6)  # Quadratic falloff
 		var force_vec: Vector3 = forward * throttle * engine_force * accel_curve
-		if _rear_grounded:
-			# Apply force at wheel contact - creates natural wheelie torque!
-			var force_pos: Vector3 = _rear_contact_point - global_position
-			apply_force(force_vec, force_pos)
-		else:
-			# In air or no ground contact - apply central force
-			apply_central_force(force_vec * 0.5)
+		# Apply force at wheel contact - creates natural wheelie torque!
+		var force_pos: Vector3 = _rear_contact_point - global_position
+		apply_force(force_vec, force_pos)
 
 	# === BRAKE / REVERSE ===
-	if throttle < 0:
+	# Only brake when NOT throttling (so Shift+S = wheelie, not brake)
+	if tilt < 0 and throttle == 0:
 		var dominated_forward: float = linear_velocity.dot(forward)
 		if dominated_forward > 1.0:
 			# Moving forward - apply brakes
 			var brake_dir: Vector3 = -linear_velocity.normalized()
 			if _front_grounded:
 				var force_pos: Vector3 = _front_contact_point - global_position
-				apply_force(brake_dir * abs(throttle) * brake_force * 0.7, force_pos)
+				apply_force(brake_dir * abs(tilt) * brake_force * 0.7, force_pos)
 			if _rear_grounded:
 				var force_pos: Vector3 = _rear_contact_point - global_position
-				apply_force(brake_dir * abs(throttle) * brake_force * 0.3, force_pos)
-		else:
-			# Stopped or moving backward - apply reverse force
-			var reverse_force: Vector3 = -forward * abs(throttle) * engine_force * 0.5
-			if _rear_grounded:
-				var force_pos: Vector3 = _rear_contact_point - global_position
-				apply_force(reverse_force, force_pos)
-			else:
-				apply_central_force(reverse_force * 0.3)
+				apply_force(brake_dir * abs(tilt) * brake_force * 0.3, force_pos)
+		elif _rear_grounded:
+			# Stopped or moving backward - apply reverse force (only when rear wheel grounded)
+			var reverse_force: Vector3 = -forward * abs(tilt) * engine_force * 0.5
+			var force_pos: Vector3 = _rear_contact_point - global_position
+			apply_force(reverse_force, force_pos)
 
 	# === STEERING & LEAN ===
 	var is_grounded: bool = _front_grounded or _rear_grounded
@@ -191,10 +186,10 @@ func _physics_process(delta: float) -> void:
 			steer_torque_applied = Vector3.UP * steer * steer_torque * speed_factor * throttle_boost * camera_boost
 			apply_torque(steer_torque_applied)
 
-		# Ground lean control (Trials-style: W/S = lean)
+		# Ground lean control (Trials-style: W/S = tilt forward/back)
 		# Use horizontal right vector to prevent yaw influence
 		var horizontal_right: Vector3 = Vector3(right.x, 0, right.z).normalized()
-		var lean_torque_applied: Vector3 = horizontal_right * throttle * lean_torque
+		var lean_torque_applied: Vector3 = horizontal_right * tilt * lean_torque
 		apply_torque(lean_torque_applied)
 
 		# === VELOCITY ALIGNMENT (instant drift recovery) ===
@@ -219,11 +214,13 @@ func _physics_process(delta: float) -> void:
 	else:
 		# === AIR CONTROL ===
 		# Air pitch for flips (W/S) - very responsive
-		apply_torque(right * throttle * air_pitch_torque)
+		apply_torque(right * tilt * air_pitch_torque)
 
 		# Air yaw (A/D) - responsive spin
 		apply_torque(Vector3.UP * steer * air_yaw_torque)
-		# Note: removed 0.98 damping - angular_damp handles it now
+
+		# Unlock yaw when airborne so landing accepts the new orientation
+		_yaw_locked = false
 
 	# === YAW HANDLING (END OF FRAME) ===
 	var speed: float = linear_velocity.length()
@@ -247,12 +244,15 @@ func _physics_process(delta: float) -> void:
 
 	# Calculate visual lean for BikeModel (separate from physics)
 	var target_visual_lean: float = 0.0
-	if is_grounded and speed > 1.0:
+	# Only apply visual lean when BOTH wheels are grounded (not during wheelies)
+	if _front_grounded and _rear_grounded and speed > 1.0:
 		# Drift lean - lean OPPOSITE to slip angle (counter-steer visual)
 		# This looks like the rider is leaning their body to counter the drift
 		var vel_horizontal: Vector3 = Vector3(linear_velocity.x, 0, linear_velocity.z)
-		if vel_horizontal.length() > 2.0:
-			var slip_angle: float = forward.signed_angle_to(vel_horizontal.normalized(), Vector3.UP)
+		# Use horizontal projection of forward to avoid issues when pitched
+		var forward_horizontal: Vector3 = Vector3(forward.x, 0, forward.z).normalized()
+		if vel_horizontal.length() > 2.0 and forward_horizontal.length() > 0.1:
+			var slip_angle: float = forward_horizontal.signed_angle_to(vel_horizontal.normalized(), Vector3.UP)
 			# Counter-lean: positive multiplier = lean opposite to drift direction
 			target_visual_lean = slip_angle * 1.5
 			target_visual_lean = clamp(target_visual_lean, -max_lean_angle, max_lean_angle)
@@ -267,7 +267,7 @@ func _physics_process(delta: float) -> void:
 	_visual_lean = lerp(_visual_lean, target_visual_lean, lean_speed)
 
 	# Gentle pitch stabilization when grounded (helps balance)
-	if is_grounded and abs(throttle) < 0.1:
+	if is_grounded and abs(tilt) < 0.1:
 		var current_pitch: float = global_rotation.x
 		apply_torque(right * -current_pitch * pitch_stabilization)
 
@@ -367,7 +367,7 @@ func _update_camera(delta: float) -> void:
 		var horiz_vel: Vector3 = Vector3(linear_velocity.x, 0, linear_velocity.z)
 
 		if horiz_vel.length() > 2.0:
-			# Moving - follow velocity direction (stable during flips)
+			# Moving - follow velocity direction
 			horizontal_dir = horiz_vel.normalized()
 		else:
 			# Slow/stopped - use bike's forward projected to horizontal
@@ -423,8 +423,8 @@ func _animate_bike(delta: float) -> void:
 	if _front_assembly:
 		_front_assembly.rotation.y = _steering_angle
 
-	# Pedal animation when accelerating
-	if Input.is_action_pressed("accelerate") and (_front_grounded or _rear_grounded):
+	# Pedal animation when throttle is held
+	if Input.is_action_pressed("throttle") and (_front_grounded or _rear_grounded):
 		var pedal_speed: float = 8.0
 		if _pedal_arm_left:
 			_pedal_arm_left.rotation.y = sin(Time.get_ticks_msec() * 0.01 * pedal_speed) * 0.5

@@ -45,8 +45,9 @@ res://
 - Prefer composition over inheritance
 
 ## Controls
-- **W**: Accelerate (bike moves forward when held)
-- **S**: Brake
+- **Shift**: Throttle (bike moves forward when held)
+- **W**: Tilt forward (lean bike forward)
+- **S**: Brake / Reverse + Tilt back
 - **A/D**: Steer left/right
 - **Mouse**: Controls camera orientation; forward direction follows mouse look
 
