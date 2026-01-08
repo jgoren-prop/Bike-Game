@@ -1,0 +1,180 @@
+[gd_scene load_steps=6 format=3 uid="uid://cclimbworld001"]
+
+[ext_resource type="Script" path="res://scripts/systems/climb_base.gd" id="1_climb_base"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(30, 1, 30)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(30, 1, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_platform"]
+size = Vector3(12, 0.5, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_platform"]
+size = Vector3(12, 0.5, 10)
+
+[node name="ClimbWorld" type="Node3D"]
+script = ExtResource("1_climb_base")
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+
+[node name="GroundPlane" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GroundPlane"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="GroundPlane"]
+mesh = SubResource("BoxMesh_ground")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 10, 50, 10)
+shadow_enabled = true
+
+[node name="Platforms" type="Node3D" parent="."]
+
+[node name="Ramp1" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 0, 3, 12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Ramp1"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Ramp1"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Platform1" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 22)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform1"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform1"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Ramp2" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(-1, 0, 0, 0, 0.966, -0.259, 0, -0.259, -0.966, 8, 9, 22)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Ramp2"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Ramp2"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Platform2" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 12, 12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform2"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform2"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Ramp3" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 8, 15, 2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Ramp3"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Ramp3"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Platform3" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 18, -8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform3"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform3"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Ramp4" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(-1, 0, 0, 0, 0.966, -0.259, 0, -0.259, -0.966, 0, 21, -8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Ramp4"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Ramp4"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Platform4" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform4"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform4"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Ramp5" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 0, 27, 12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Ramp5"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Ramp5"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Platform5" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 22)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform5"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform5"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Ramp6" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(-1, 0, 0, 0, 0.966, -0.259, 0, -0.259, -0.966, -8, 33, 22)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Ramp6"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Ramp6"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Platform6" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 36, 12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform6"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform6"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Ramp7" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, -8, 39, 2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Ramp7"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Ramp7"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Platform7" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 42, -8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform7"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform7"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Ramp8" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(-1, 0, 0, 0, 0.966, -0.259, 0, -0.259, -0.966, 0, 45, -8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Ramp8"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Ramp8"]
+mesh = SubResource("BoxMesh_platform")
+
+[node name="Platform8_Top" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 48, 2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform8_Top"]
+shape = SubResource("BoxShape3D_platform")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform8_Top"]
+mesh = SubResource("BoxMesh_platform")

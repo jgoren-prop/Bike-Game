@@ -22,4 +22,4 @@ func _on_body_entered(body: Node3D) -> void:
 	if body is BikeController:
 		var knockback_dir: Vector3 = (body.global_position - global_position).normalized()
 		knockback_dir.y = 0.5
-		body.velocity = knockback_dir * knockback_force
+		body.linear_velocity = knockback_dir * knockback_force

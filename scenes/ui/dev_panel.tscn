@@ -9,66 +9,426 @@ script = ExtResource("1_dev")
 
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -180.0
-offset_right = 150.0
-offset_bottom = 180.0
-grow_horizontal = 2
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -350.0
+grow_horizontal = 0
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="SpeedDisplay" type="PanelContainer" parent="Panel"]
 layout_mode = 2
-theme_override_constants/separation = 10
+size_flags_vertical = 0
 
-[node name="Title" type="Label" parent="Panel/VBox"]
+[node name="SpeedLabel" type="Label" parent="Panel/SpeedDisplay"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Speed: 0.0 m/s"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Panel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "DEV PANEL (F1 to close)"
+text = "PHYSICS SANDBOX (F1)"
 horizontal_alignment = 1
 
-[node name="Sep1" type="HSeparator" parent="Panel/VBox"]
+[node name="Sep0" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
 layout_mode = 2
 
-[node name="UnlockAllBtn" type="Button" parent="Panel/VBox"]
+[node name="MovementHeader" type="Label" parent="Panel/ScrollContainer/VBox"]
 layout_mode = 2
-text = "Unlock Everything"
+theme_override_colors/font_color = Color(0.5, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "MOVEMENT"
 
-[node name="Add10kBtn" type="Button" parent="Panel/VBox"]
-layout_mode = 2
-text = "Add 10,000 Coins"
-
-[node name="Add100kBtn" type="Button" parent="Panel/VBox"]
-layout_mode = 2
-text = "Add 100,000 Coins"
-
-[node name="Sep2" type="HSeparator" parent="Panel/VBox"]
+[node name="MovementSection" type="VBoxContainer" parent="Panel/ScrollContainer/VBox"]
 layout_mode = 2
 
-[node name="MaxSpeedBtn" type="Button" parent="Panel/VBox"]
+[node name="MaxSpeedLabel" type="Label" parent="Panel/ScrollContainer/VBox/MovementSection"]
 layout_mode = 2
-text = "Max Speed Upgrade"
+text = "Max Speed"
 
-[node name="MaxAllUpgradesBtn" type="Button" parent="Panel/VBox"]
-layout_mode = 2
-text = "Max All Upgrades"
-
-[node name="Sep3" type="HSeparator" parent="Panel/VBox"]
+[node name="MaxSpeedRow" type="HBoxContainer" parent="Panel/ScrollContainer/VBox/MovementSection"]
 layout_mode = 2
 
-[node name="SkipStageBtn" type="Button" parent="Panel/VBox"]
+[node name="MaxSpeedSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/MovementSection"]
 layout_mode = 2
-text = "Complete Current Stage"
+min_value = 5.0
+max_value = 50.0
+value = 18.0
 
-[node name="Sep4" type="HSeparator" parent="Panel/VBox"]
+[node name="MaxSpeedValue" type="Label" parent="Panel/ScrollContainer/VBox/MovementSection"]
+layout_mode = 2
+text = "30.0"
+horizontal_alignment = 2
+
+[node name="AccelerationLabel" type="Label" parent="Panel/ScrollContainer/VBox/MovementSection"]
+layout_mode = 2
+text = "Acceleration"
+
+[node name="AccelerationSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/MovementSection"]
+layout_mode = 2
+min_value = 500.0
+max_value = 5000.0
+step = 100.0
+value = 2400.0
+
+[node name="AccelerationValue" type="Label" parent="Panel/ScrollContainer/VBox/MovementSection"]
+layout_mode = 2
+text = "20.0"
+horizontal_alignment = 2
+
+[node name="BrakeLabel" type="Label" parent="Panel/ScrollContainer/VBox/MovementSection"]
+layout_mode = 2
+text = "Brake Force"
+
+[node name="BrakeSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/MovementSection"]
+layout_mode = 2
+min_value = 1000.0
+max_value = 6000.0
+step = 100.0
+value = 3500.0
+
+[node name="BrakeValue" type="Label" parent="Panel/ScrollContainer/VBox/MovementSection"]
+layout_mode = 2
+text = "65.0"
+horizontal_alignment = 2
+
+[node name="Sep2" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Panel/VBox"]
+[node name="MomentumHeader" type="Label" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "MOMENTUM"
+
+[node name="MomentumSection" type="VBoxContainer" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="MassLabel" type="Label" parent="Panel/ScrollContainer/VBox/MomentumSection"]
+layout_mode = 2
+text = "Mass"
+
+[node name="MassSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/MomentumSection"]
+layout_mode = 2
+min_value = 30.0
+max_value = 150.0
+step = 5.0
+value = 60.0
+
+[node name="MassValue" type="Label" parent="Panel/ScrollContainer/VBox/MomentumSection"]
+layout_mode = 2
+text = "150kg"
+horizontal_alignment = 2
+
+[node name="DragLabel" type="Label" parent="Panel/ScrollContainer/VBox/MomentumSection"]
+layout_mode = 2
+text = "Drag"
+
+[node name="DragSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/MomentumSection"]
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.3
+
+[node name="DragValue" type="Label" parent="Panel/ScrollContainer/VBox/MomentumSection"]
+layout_mode = 2
+text = "0.3"
+horizontal_alignment = 2
+
+[node name="Sep3" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="SteeringHeader" type="Label" parent="Panel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 1, 0.5, 1)
-text = "Ready"
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+text = "STEERING"
+
+[node name="SteeringSection" type="VBoxContainer" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="TurnSpeedLabel" type="Label" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+text = "Steer Torque"
+
+[node name="TurnSpeedSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+min_value = 200.0
+max_value = 1500.0
+step = 50.0
+value = 600.0
+
+[node name="TurnSpeedValue" type="Label" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+text = "2.6"
+horizontal_alignment = 2
+
+[node name="TurnInertiaLabel" type="Label" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+text = "Lean Torque"
+
+[node name="TurnInertiaSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+min_value = 50.0
+max_value = 500.0
+step = 25.0
+value = 150.0
+
+[node name="TurnInertiaValue" type="Label" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+text = "0.0"
+horizontal_alignment = 2
+
+[node name="DriftLabel" type="Label" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+text = "Roll Stability"
+
+[node name="DriftSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+min_value = 20.0
+max_value = 300.0
+step = 10.0
+value = 100.0
+
+[node name="DriftValue" type="Label" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+text = "0.3"
+horizontal_alignment = 2
+
+[node name="AutoAlignLabel" type="Label" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+text = "Pitch Stability"
+
+[node name="AutoAlignSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+min_value = 10.0
+max_value = 200.0
+step = 10.0
+value = 50.0
+
+[node name="AutoAlignValue" type="Label" parent="Panel/ScrollContainer/VBox/SteeringSection"]
+layout_mode = 2
+text = "5.0"
+horizontal_alignment = 2
+
+[node name="Sep4" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="FrictionHeader" type="Label" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "JUMP"
+
+[node name="FrictionSection" type="VBoxContainer" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="JumpLabel" type="Label" parent="Panel/ScrollContainer/VBox/FrictionSection"]
+layout_mode = 2
+text = "Jump Force"
+
+[node name="JumpSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/FrictionSection"]
+layout_mode = 2
+min_value = 100.0
+max_value = 1000.0
+step = 50.0
+value = 400.0
+
+[node name="JumpValue" type="Label" parent="Panel/ScrollContainer/VBox/FrictionSection"]
+layout_mode = 2
+text = "11.0"
+horizontal_alignment = 2
+
+[node name="Sep5" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="ArcadeHeader" type="Label" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.5, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "ARCADE FEEL"
+
+[node name="ArcadeSection" type="VBoxContainer" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="AngularDampLabel" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "Angular Damping (Air)"
+
+[node name="AngularDampSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+min_value = 0.1
+max_value = 5.0
+step = 0.1
+value = 0.8
+
+[node name="AngularDampValue" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "0.8"
+horizontal_alignment = 2
+
+[node name="VelAlignLabel" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "Drift Recovery"
+
+[node name="VelAlignSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+max_value = 20.0
+step = 0.5
+value = 6.0
+
+[node name="VelAlignValue" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "15.0"
+horizontal_alignment = 2
+
+[node name="AirPitchLabel" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "Air Flip Power"
+
+[node name="AirPitchSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+min_value = 50.0
+max_value = 1500.0
+step = 50.0
+value = 200.0
+
+[node name="AirPitchValue" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "1200.0"
+horizontal_alignment = 2
+
+[node name="AirYawLabel" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "Air Spin Power"
+
+[node name="AirYawSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+min_value = 10.0
+max_value = 500.0
+step = 10.0
+value = 50.0
+
+[node name="AirYawValue" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "400.0"
+horizontal_alignment = 2
+
+[node name="FovBoostLabel" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "Speed FOV Boost"
+
+[node name="FovBoostSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+max_value = 20.0
+step = 0.5
+value = 1.0
+
+[node name="FovBoostValue" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "15.0"
+horizontal_alignment = 2
+
+[node name="LandingSquashLabel" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "Landing Squash"
+
+[node name="LandingSquashSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+max_value = 0.3
+step = 0.01
+value = 0.1
+
+[node name="LandingSquashValue" type="Label" parent="Panel/ScrollContainer/VBox/ArcadeSection"]
+layout_mode = 2
+text = "0.15"
+horizontal_alignment = 2
+
+[node name="Sep6" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="CameraHeader" type="Label" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "CAMERA"
+
+[node name="CameraSection" type="VBoxContainer" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="BaseFovLabel" type="Label" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+text = "Field of View"
+
+[node name="BaseFovSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+min_value = 40.0
+max_value = 120.0
+step = 1.0
+value = 65.0
+
+[node name="BaseFovValue" type="Label" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+text = "65.0"
+horizontal_alignment = 2
+
+[node name="CameraDistLabel" type="Label" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+text = "Camera Distance"
+
+[node name="CameraDistSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+min_value = 3.0
+max_value = 20.0
+step = 0.5
+value = 5.5
+
+[node name="CameraDistValue" type="Label" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+text = "5.5"
+horizontal_alignment = 2
+
+[node name="CameraHeightLabel" type="Label" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+text = "Camera Height"
+
+[node name="CameraHeightSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+min_value = 1.0
+max_value = 10.0
+step = 0.5
+value = 3.0
+
+[node name="CameraHeightValue" type="Label" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+text = "3.0"
+horizontal_alignment = 2
+
+[node name="CameraAngleLabel" type="Label" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+text = "Camera Angle"
+
+[node name="CameraAngleSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+min_value = -30.0
+max_value = 60.0
+step = 1.0
+value = 16.0
+
+[node name="CameraAngleValue" type="Label" parent="Panel/ScrollContainer/VBox/CameraSection"]
+layout_mode = 2
+text = "16.0°"
+horizontal_alignment = 2

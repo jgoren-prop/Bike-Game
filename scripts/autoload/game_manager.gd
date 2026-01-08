@@ -1,16 +1,11 @@
 extends Node
 class_name GameManagerClass
 
-## Overall game state manager
+## Overall game state manager for rage game
 
-enum GameState { MENU, HUB, IN_RUN, PAUSED }
+enum GameState { MENU, PLAYING, PAUSED }
 
-var current_state: GameState = GameState.HUB
-
-# Stats tracking
-var best_stage: int = 0
-var total_runs: int = 0
-var total_earnings: int = 0
+var current_state: GameState = GameState.MENU
 
 signal state_changed(new_state: GameState)
 
@@ -20,5 +15,23 @@ func change_state(new_state: GameState) -> void:
 	state_changed.emit(new_state)
 
 
-func is_in_run() -> bool:
-	return current_state == GameState.IN_RUN
+func is_playing() -> bool:
+	return current_state == GameState.PLAYING
+
+
+func start_game() -> void:
+	change_state(GameState.PLAYING)
+
+
+func pause_game() -> void:
+	if current_state == GameState.PLAYING:
+		change_state(GameState.PAUSED)
+
+
+func resume_game() -> void:
+	if current_state == GameState.PAUSED:
+		change_state(GameState.PLAYING)
+
+
+func return_to_menu() -> void:
+	change_state(GameState.MENU)

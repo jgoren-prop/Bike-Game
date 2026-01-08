@@ -11,15 +11,13 @@ config_version=5
 [application]
 
 config/name="Bike Game"
+run/main_scene="res://scenes/test/test_park.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
-run/main_scene="res://scenes/hub/hub.tscn"
 
 [autoload]
 
 GameManager="*res://scripts/autoload/game_manager.gd"
-Economy="*res://scripts/autoload/economy.gd"
-RunManager="*res://scripts/autoload/run_manager.gd"
 BikeData="*res://scripts/autoload/bike_data.gd"
 SaveManager="*res://scripts/autoload/save_manager.gd"
 DevPanel="*res://scenes/ui/dev_panel.tscn"
