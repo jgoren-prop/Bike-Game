@@ -3,9 +3,11 @@ extends CanvasLayer
 ## RigidBody3D Bike Dev Panel - real-time physics parameter tweaking
 
 var _bike: BikeController = null
+var _debug_overlay_visible: bool = false
 
 @onready var _panel: Control = $Panel
 @onready var _speed_label: Label = $Panel/SpeedDisplay/SpeedLabel
+@onready var _debug_overlay: Label = $DebugOverlay
 
 # Movement sliders
 @onready var _max_speed_slider: HSlider = $Panel/ScrollContainer/VBox/MovementSection/MaxSpeedSlider
@@ -32,11 +34,14 @@ var _bike: BikeController = null
 @onready var _normal_roll_damp_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/NormalRollDampSlider
 @onready var _lean_angle_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/LeanAngleSlider
 
-# STEEP SLOPE sliders (new - controls tipping behavior)
+# TIPPING BEHAVIOR sliders (angle-based for intuitive tuning)
+@onready var _tip_start_angle_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/TipStartAngleSlider
+@onready var _tip_full_angle_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/TipFullAngleSlider
+@onready var _roll_risk_threshold_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/RollRiskThresholdSlider
+@onready var _tip_safe_speed_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/TipSafeSpeedSlider
+@onready var _tip_torque_strength_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/TipTorqueStrengthSlider
 @onready var _steep_upright_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/SteepUprightSlider
 @onready var _steep_roll_damp_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/SteepRollDampSlider
-@onready var _wall_tip_speed_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/WallTipSpeedSlider
-@onready var _steep_threshold_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/SteepThresholdSlider
 
 # Jump slider
 @onready var _jump_slider: HSlider = $Panel/ScrollContainer/VBox/FrictionSection/JumpSlider
@@ -86,11 +91,14 @@ var _bike: BikeController = null
 @onready var _normal_roll_damp_value: Label = $Panel/ScrollContainer/VBox/StabSection/NormalRollDampValue
 @onready var _lean_angle_value: Label = $Panel/ScrollContainer/VBox/StabSection/LeanAngleValue
 
-# STEEP SLOPE value labels
+# TIPPING BEHAVIOR value labels
+@onready var _tip_start_angle_value: Label = $Panel/ScrollContainer/VBox/SteepSection/TipStartAngleValue
+@onready var _tip_full_angle_value: Label = $Panel/ScrollContainer/VBox/SteepSection/TipFullAngleValue
+@onready var _roll_risk_threshold_value: Label = $Panel/ScrollContainer/VBox/SteepSection/RollRiskThresholdValue
+@onready var _tip_safe_speed_value: Label = $Panel/ScrollContainer/VBox/SteepSection/TipSafeSpeedValue
+@onready var _tip_torque_strength_value: Label = $Panel/ScrollContainer/VBox/SteepSection/TipTorqueStrengthValue
 @onready var _steep_upright_value: Label = $Panel/ScrollContainer/VBox/SteepSection/SteepUprightValue
 @onready var _steep_roll_damp_value: Label = $Panel/ScrollContainer/VBox/SteepSection/SteepRollDampValue
-@onready var _wall_tip_speed_value: Label = $Panel/ScrollContainer/VBox/SteepSection/WallTipSpeedValue
-@onready var _steep_threshold_value: Label = $Panel/ScrollContainer/VBox/SteepSection/SteepThresholdValue
 
 @onready var _jump_value: Label = $Panel/ScrollContainer/VBox/FrictionSection/JumpValue
 
@@ -126,23 +134,68 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if _bike and _speed_label:
-		var grounded_status: String = ""
-		if _bike.is_front_grounded() and _bike.is_rear_grounded():
-			grounded_status = " [GROUNDED]"
-		elif _bike.is_front_grounded():
-			grounded_status = " [FRONT]"
-		elif _bike.is_rear_grounded():
-			grounded_status = " [REAR]"
-		else:
-			grounded_status = " [AIR]"
-		_speed_label.text = "Speed: %.1f m/s%s" % [_bike.get_current_speed(), grounded_status]
+	# Find bike if not already found
+	if not _bike:
+		_find_bike()
+	
+	if not _bike:
+		return
+	
+	# Build debug text
+	var grounded_status: String = ""
+	if _bike.is_front_grounded() and _bike.is_rear_grounded():
+		grounded_status = " [GROUNDED]"
+	elif _bike.is_front_grounded():
+		grounded_status = " [FRONT]"
+	elif _bike.is_rear_grounded():
+		grounded_status = " [REAR]"
+	else:
+		grounded_status = " [AIR]"
+	
+	# Show tipping debug info
+	var mode_name: String = _bike.get_stability_mode_name()
+	var slope_angle: float = _bike.get_slope_angle()
+	var roll_risk: float = _bike.get_roll_risk()
+	var tip_blend: float = _bike.get_tip_blend()
+	
+	# Platform debug info
+	var susp_info: Dictionary = _bike.get_debug_suspension_info()
+	var platform_str: String = ""
+	if susp_info.on_platform:
+		platform_str = "\nPLATFORM: vel_y=%.2f | comp_f=%.3f | comp_r=%.3f" % [
+			susp_info.platform_vel_y, susp_info.front_compression, susp_info.rear_compression
+		]
+	
+	var debug_text: String = "Speed: %.1f m/s%s\nMode: %s | Slope: %.1f° | Risk: %.2f | Blend: %.2f%s" % [
+		_bike.get_current_speed(), grounded_status,
+		mode_name, slope_angle, roll_risk, tip_blend, platform_str
+	]
+	
+	# Update dev panel label (when panel is open)
+	if _speed_label:
+		_speed_label.text = debug_text
+	
+	# Update debug overlay (F2 toggle, doesn't pause game)
+	if _debug_overlay:
+		_debug_overlay.visible = _debug_overlay_visible
+		if _debug_overlay_visible:
+			_debug_overlay.text = debug_text
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_F1:
-		toggle_panel()
-		get_viewport().set_input_as_handled()
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_F1:
+			toggle_panel()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F2:
+			toggle_debug_overlay()
+			get_viewport().set_input_as_handled()
+
+
+func toggle_debug_overlay() -> void:
+	_debug_overlay_visible = not _debug_overlay_visible
+	if _debug_overlay_visible and not _bike:
+		_find_bike()
 
 
 func toggle_panel() -> void:
@@ -204,15 +257,21 @@ func _connect_sliders() -> void:
 		_normal_roll_damp_slider.value_changed.connect(_on_normal_roll_damp_changed)
 	if _lean_angle_slider:
 		_lean_angle_slider.value_changed.connect(_on_lean_angle_changed)
-	# STEEP SLOPE sliders
+	# TIPPING BEHAVIOR sliders
+	if _tip_start_angle_slider:
+		_tip_start_angle_slider.value_changed.connect(_on_tip_start_angle_changed)
+	if _tip_full_angle_slider:
+		_tip_full_angle_slider.value_changed.connect(_on_tip_full_angle_changed)
+	if _roll_risk_threshold_slider:
+		_roll_risk_threshold_slider.value_changed.connect(_on_roll_risk_threshold_changed)
+	if _tip_safe_speed_slider:
+		_tip_safe_speed_slider.value_changed.connect(_on_tip_safe_speed_changed)
+	if _tip_torque_strength_slider:
+		_tip_torque_strength_slider.value_changed.connect(_on_tip_torque_strength_changed)
 	if _steep_upright_slider:
 		_steep_upright_slider.value_changed.connect(_on_steep_upright_changed)
 	if _steep_roll_damp_slider:
 		_steep_roll_damp_slider.value_changed.connect(_on_steep_roll_damp_changed)
-	if _wall_tip_speed_slider:
-		_wall_tip_speed_slider.value_changed.connect(_on_wall_tip_speed_changed)
-	if _steep_threshold_slider:
-		_steep_threshold_slider.value_changed.connect(_on_steep_threshold_changed)
 	if _jump_slider:
 		_jump_slider.value_changed.connect(_on_jump_changed)
 	# Arcade sliders
@@ -304,19 +363,28 @@ func _sync_sliders_from_bike() -> void:
 	if _lean_angle_slider:
 		_lean_angle_slider.value = _bike.lean_into_turn_angle
 		_update_value_label(_lean_angle_value, _bike.lean_into_turn_angle, " rad")
-	# STEEP SLOPE sliders
+	# TIPPING BEHAVIOR sliders
+	if _tip_start_angle_slider:
+		_tip_start_angle_slider.value = _bike.tip_start_angle
+		_update_value_label(_tip_start_angle_value, _bike.tip_start_angle, "°")
+	if _tip_full_angle_slider:
+		_tip_full_angle_slider.value = _bike.tip_full_angle
+		_update_value_label(_tip_full_angle_value, _bike.tip_full_angle, "°")
+	if _roll_risk_threshold_slider:
+		_roll_risk_threshold_slider.value = _bike.roll_risk_threshold
+		_update_value_label(_roll_risk_threshold_value, _bike.roll_risk_threshold)
+	if _tip_safe_speed_slider:
+		_tip_safe_speed_slider.value = _bike.tip_safe_speed
+		_update_value_label(_tip_safe_speed_value, _bike.tip_safe_speed, " m/s")
+	if _tip_torque_strength_slider:
+		_tip_torque_strength_slider.value = _bike.tip_torque_strength
+		_update_value_label(_tip_torque_strength_value, _bike.tip_torque_strength, " Nm")
 	if _steep_upright_slider:
 		_steep_upright_slider.value = _bike.steep_upright_strength
 		_update_value_label(_steep_upright_value, _bike.steep_upright_strength)
 	if _steep_roll_damp_slider:
 		_steep_roll_damp_slider.value = _bike.steep_roll_damping
 		_update_value_label(_steep_roll_damp_value, _bike.steep_roll_damping)
-	if _wall_tip_speed_slider:
-		_wall_tip_speed_slider.value = _bike.wall_tip_speed
-		_update_value_label(_wall_tip_speed_value, _bike.wall_tip_speed, " m/s")
-	if _steep_threshold_slider:
-		_steep_threshold_slider.value = _bike.steep_slope_threshold
-		_update_value_label(_steep_threshold_value, _bike.steep_slope_threshold)
 	if _jump_slider:
 		_jump_slider.value = _bike.jump_impulse
 		_update_value_label(_jump_value, _bike.jump_impulse)
@@ -472,7 +540,37 @@ func _on_lean_angle_changed(value: float) -> void:
 		_update_value_label(_lean_angle_value, value, " rad")
 
 
-# === STEEP SLOPE CALLBACKS ===
+# === TIPPING BEHAVIOR CALLBACKS ===
+
+func _on_tip_start_angle_changed(value: float) -> void:
+	if _bike:
+		_bike.tip_start_angle = value
+		_update_value_label(_tip_start_angle_value, value, "°")
+
+
+func _on_tip_full_angle_changed(value: float) -> void:
+	if _bike:
+		_bike.tip_full_angle = value
+		_update_value_label(_tip_full_angle_value, value, "°")
+
+
+func _on_roll_risk_threshold_changed(value: float) -> void:
+	if _bike:
+		_bike.roll_risk_threshold = value
+		_update_value_label(_roll_risk_threshold_value, value)
+
+
+func _on_tip_safe_speed_changed(value: float) -> void:
+	if _bike:
+		_bike.tip_safe_speed = value
+		_update_value_label(_tip_safe_speed_value, value, " m/s")
+
+
+func _on_tip_torque_strength_changed(value: float) -> void:
+	if _bike:
+		_bike.tip_torque_strength = value
+		_update_value_label(_tip_torque_strength_value, value, " Nm")
+
 
 func _on_steep_upright_changed(value: float) -> void:
 	if _bike:
@@ -484,18 +582,6 @@ func _on_steep_roll_damp_changed(value: float) -> void:
 	if _bike:
 		_bike.steep_roll_damping = value
 		_update_value_label(_steep_roll_damp_value, value)
-
-
-func _on_wall_tip_speed_changed(value: float) -> void:
-	if _bike:
-		_bike.wall_tip_speed = value
-		_update_value_label(_wall_tip_speed_value, value, " m/s")
-
-
-func _on_steep_threshold_changed(value: float) -> void:
-	if _bike:
-		_bike.steep_slope_threshold = value
-		_update_value_label(_steep_threshold_value, value)
 
 
 func _on_jump_changed(value: float) -> void:
@@ -632,11 +718,14 @@ func _on_copy_pressed() -> void:
 	text += "  Normal Stability: %.1f\n" % _bike.normal_upright_strength
 	text += "  Normal Roll Damping: %.1f\n" % _bike.normal_roll_damping
 	text += "  Lean Angle: %.2f rad\n" % _bike.lean_into_turn_angle
-	text += "\nSTEEP SLOPE:\n"
+	text += "\nTIPPING BEHAVIOR:\n"
+	text += "  Tip Start Angle: %.1f°\n" % _bike.tip_start_angle
+	text += "  Tip Full Angle: %.1f°\n" % _bike.tip_full_angle
+	text += "  Roll Risk Threshold: %.2f\n" % _bike.roll_risk_threshold
+	text += "  Tip Safe Speed: %.1f m/s\n" % _bike.tip_safe_speed
+	text += "  Tip Torque Strength: %.1f Nm\n" % _bike.tip_torque_strength
 	text += "  Steep Upright Strength: %.1f\n" % _bike.steep_upright_strength
 	text += "  Steep Roll Damping: %.1f\n" % _bike.steep_roll_damping
-	text += "  Wall Tip Speed: %.1f m/s\n" % _bike.wall_tip_speed
-	text += "  Steep Slope Threshold: %.2f\n" % _bike.steep_slope_threshold
 	text += "\nJUMP:\n"
 	text += "  Jump Force: %.1f\n" % _bike.jump_impulse
 	text += "\nARCADE FEEL:\n"

@@ -1,0 +1,204 @@
+[gd_scene load_steps=12 format=3 uid="uid://dkmh5uklkvofj"]
+
+[ext_resource type="Script" uid="uid://bbry0kq6m23kj" path="res://scripts/bike/raccoon_rider.gd" id="1_raccoon"]
+
+[sub_resource type="CylinderMesh" id="mesh_torso"]
+top_radius = 0.055
+bottom_radius = 0.065
+height = 0.14
+
+[sub_resource type="StandardMaterial3D" id="mat_gray_fur"]
+albedo_color = Color(0.45, 0.42, 0.4, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="mat_light_fur"]
+albedo_color = Color(0.75, 0.72, 0.68, 1)
+roughness = 0.95
+
+[sub_resource type="SphereMesh" id="mesh_head"]
+radius = 0.07
+height = 0.12
+
+[sub_resource type="StandardMaterial3D" id="mat_dark_fur"]
+albedo_color = Color(0.12, 0.1, 0.1, 1)
+roughness = 0.95
+
+[sub_resource type="CylinderMesh" id="mesh_snout"]
+top_radius = 0.02
+bottom_radius = 0.03
+height = 0.04
+
+[sub_resource type="CylinderMesh" id="mesh_ear"]
+top_radius = 0.008
+bottom_radius = 0.022
+height = 0.03
+
+[sub_resource type="CylinderMesh" id="mesh_limb"]
+top_radius = 0.018
+bottom_radius = 0.015
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="mat_strap"]
+albedo_color = Color(0.15, 0.15, 0.15, 1)
+roughness = 0.7
+
+[sub_resource type="CylinderMesh" id="mesh_tail"]
+top_radius = 0.025
+bottom_radius = 0.018
+height = 0.12
+
+[node name="RaccoonRider" type="Node3D"]
+script = ExtResource("1_raccoon")
+
+[node name="Body" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0.02)
+
+[node name="Torso" type="MeshInstance3D" parent="Body"]
+mesh = SubResource("mesh_torso")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="Belly" type="MeshInstance3D" parent="Body"]
+transform = Transform3D(0.7, 0, 0, 0, 0.8, 0, 0, 0, 0.7, 0, -0.01, 0.03)
+mesh = SubResource("mesh_torso")
+surface_material_override/0 = SubResource("mat_light_fur")
+
+[node name="Head" type="Node3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.11, 0.04)
+
+[node name="Skull" type="MeshInstance3D" parent="Body/Head"]
+mesh = SubResource("mesh_head")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="LeftMask" type="MeshInstance3D" parent="Body/Head"]
+transform = Transform3D(0.4, 0, 0, 0, 0.25, 0, 0, 0, 0.3, -0.035, 0.01, 0.045)
+mesh = SubResource("mesh_head")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="RightMask" type="MeshInstance3D" parent="Body/Head"]
+transform = Transform3D(0.4, 0, 0, 0, 0.25, 0, 0, 0, 0.3, 0.035, 0.01, 0.045)
+mesh = SubResource("mesh_head")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="Snout" type="MeshInstance3D" parent="Body/Head"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, -0.02, 0.06)
+mesh = SubResource("mesh_snout")
+surface_material_override/0 = SubResource("mat_light_fur")
+
+[node name="LeftEar" type="MeshInstance3D" parent="Body/Head"]
+transform = Transform3D(1, 0, 0, 0, 0.94, -0.34, 0, 0.34, 0.94, -0.04, 0.06, -0.01)
+mesh = SubResource("mesh_ear")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="RightEar" type="MeshInstance3D" parent="Body/Head"]
+transform = Transform3D(1, 0, 0, 0, 0.94, -0.34, 0, 0.34, 0.94, 0.04, 0.06, -0.01)
+mesh = SubResource("mesh_ear")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="StrapLeft" type="MeshInstance3D" parent="Body/Head"]
+transform = Transform3D(0.15, 0, 0, 0, 0.6, 0, 0, 0, 0.15, -0.055, -0.02, 0.02)
+mesh = SubResource("mesh_limb")
+surface_material_override/0 = SubResource("mat_strap")
+
+[node name="StrapRight" type="MeshInstance3D" parent="Body/Head"]
+transform = Transform3D(0.15, 0, 0, 0, 0.6, 0, 0, 0, 0.15, 0.055, -0.02, 0.02)
+mesh = SubResource("mesh_limb")
+surface_material_override/0 = SubResource("mat_strap")
+
+[node name="StrapLoose" type="Node3D" parent="Body/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, -0.055, 0.02)
+
+[node name="Segment1" type="MeshInstance3D" parent="Body/Head/StrapLoose"]
+transform = Transform3D(0.12, 0, 0, 0, 0.4, 0, 0, 0, 0.12, 0, 0, 0)
+mesh = SubResource("mesh_limb")
+surface_material_override/0 = SubResource("mat_strap")
+
+[node name="Segment2" type="MeshInstance3D" parent="Body/Head/StrapLoose"]
+transform = Transform3D(0.12, 0, 0, 0, 0.3, 0, 0, 0, 0.12, 0, -0.035, 0)
+mesh = SubResource("mesh_limb")
+surface_material_override/0 = SubResource("mat_strap")
+
+[node name="LeftArm" type="Node3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, -0.07, 0.03, 0.04)
+
+[node name="Arm" type="MeshInstance3D" parent="Body/LeftArm"]
+mesh = SubResource("mesh_limb")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="Paw" type="MeshInstance3D" parent="Body/LeftArm"]
+transform = Transform3D(0.8, 0, 0, 0, 0.5, 0, 0, 0, 0.8, 0, -0.055, 0)
+mesh = SubResource("mesh_head")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="RightArm" type="Node3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 0.866, -0.5, 0, 0.5, 0.866, 0.07, 0.03, 0.04)
+
+[node name="Arm" type="MeshInstance3D" parent="Body/RightArm"]
+mesh = SubResource("mesh_limb")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="Paw" type="MeshInstance3D" parent="Body/RightArm"]
+transform = Transform3D(0.8, 0, 0, 0, 0.5, 0, 0, 0, 0.8, 0, -0.055, 0)
+mesh = SubResource("mesh_head")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="LeftLeg" type="Node3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866, 0, -0.866, 0.5, -0.05, -0.05, 0.06)
+
+[node name="Leg" type="MeshInstance3D" parent="Body/LeftLeg"]
+mesh = SubResource("mesh_limb")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="Foot" type="MeshInstance3D" parent="Body/LeftLeg"]
+transform = Transform3D(0.9, 0, 0, 0, 0.6, 0, 0, 0, 0.9, 0, -0.055, 0)
+mesh = SubResource("mesh_head")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="RightLeg" type="Node3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866, 0, 0.866, 0.5, 0.05, -0.05, 0.06)
+
+[node name="Leg" type="MeshInstance3D" parent="Body/RightLeg"]
+mesh = SubResource("mesh_limb")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="Foot" type="MeshInstance3D" parent="Body/RightLeg"]
+transform = Transform3D(0.9, 0, 0, 0, 0.6, 0, 0, 0, 0.9, 0, -0.055, 0)
+mesh = SubResource("mesh_head")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="Tail" type="Node3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866, 0, 0.866, 0.5, 0, -0.02, -0.08)
+
+[node name="Segment1" type="MeshInstance3D" parent="Body/Tail"]
+mesh = SubResource("mesh_tail")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="Stripe1" type="MeshInstance3D" parent="Body/Tail"]
+transform = Transform3D(0.6, 0, 0, 0, 0.25, 0, 0, 0, 0.6, 0, -0.02, 0)
+mesh = SubResource("mesh_tail")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="Segment2" type="Node3D" parent="Body/Tail"]
+transform = Transform3D(1, 0, 0, 0, 0.94, 0.34, 0, -0.34, 0.94, 0, -0.1, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Body/Tail/Segment2"]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, 0)
+mesh = SubResource("mesh_tail")
+surface_material_override/0 = SubResource("mat_dark_fur")
+
+[node name="Stripe" type="MeshInstance3D" parent="Body/Tail/Segment2"]
+transform = Transform3D(0.5, 0, 0, 0, 0.2, 0, 0, 0, 0.5, 0, -0.02, 0)
+mesh = SubResource("mesh_tail")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="Segment3" type="Node3D" parent="Body/Tail/Segment2"]
+transform = Transform3D(1, 0, 0, 0, 0.94, 0.34, 0, -0.34, 0.94, 0, -0.08, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Body/Tail/Segment2/Segment3"]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0, 0)
+mesh = SubResource("mesh_tail")
+surface_material_override/0 = SubResource("mat_gray_fur")
+
+[node name="Tip" type="MeshInstance3D" parent="Body/Tail/Segment2/Segment3"]
+transform = Transform3D(0.4, 0, 0, 0, 0.5, 0, 0, 0, 0.4, 0, -0.05, 0)
+mesh = SubResource("mesh_tail")
+surface_material_override/0 = SubResource("mat_dark_fur")

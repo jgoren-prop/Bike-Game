@@ -1,6 +1,7 @@
-[gd_scene load_steps=24 format=3 uid="uid://buxj72q75k38i"]
+[gd_scene load_steps=25 format=3 uid="uid://buxj72q75k38i"]
 
 [ext_resource type="Script" uid="uid://48tv28sjad6l" path="res://scripts/bike/bike_controller.gd" id="1_bike_ctrl"]
+[ext_resource type="PackedScene" uid="uid://raccoon_rider_01" path="res://scenes/bike/raccoon_rider.tscn" id="2_raccoon"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_bike"]
 friction = 0.8
@@ -170,6 +171,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -0.12)
 mesh = SubResource("BoxMesh_seat")
 surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
+[node name="RaccoonRider" parent="BikeModel" instance=ExtResource("2_raccoon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -0.12)
+
 [node name="FrontAssembly" type="Node3D" parent="BikeModel"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.65)
 
@@ -308,13 +312,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.38, 0.65)
 shape = SubResource("SphereShape3D_probe")
 target_position = Vector3(0, -0.95, 0)
-max_results = 1
+max_results = 8
 
 [node name="RearWheelProbe" type="ShapeCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.38, -0.6)
 shape = SubResource("SphereShape3D_probe")
 target_position = Vector3(0, -0.95, 0)
-max_results = 1
+max_results = 8
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

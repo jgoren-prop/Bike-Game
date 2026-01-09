@@ -186,18 +186,28 @@ var lean_back: float = 1.0 if Input.is_action_pressed("lean_back") else 0.0
 | `steep_upright_strength` | 40.0 | Very weak when sideways on steep slope (allows tipping) |
 | `steep_roll_damping` | 10.0 | Low damping allows natural falling (direct Nm/(rad/s)) |
 | `grounded_com_offset` | -0.05 | Slight COM lowering when grounded (less artificial stability) |
+| `grounded_com_forward` | 0.15 | Forward COM shift when grounded (counteracts acceleration pitch) |
 
 **Note**: Damping values are now direct Nm/(rad/s) without mass multiplier.
 
-### Stability Mode Thresholds
+### Tipping Behavior (Angle-Based)
 
 | Parameter | Default Value | Description |
 |-----------|---------------|-------------|
-| `steep_slope_threshold` | 0.5 | ground_up.y below this = steep (~60°) |
-| `across_slope_threshold` | 0.7 | Movement perpendicular to downhill |
-| `wall_tip_speed` | 6.0 m/s | Below this + steep + sideways = can tip (raised for forgiving gameplay) |
+| `tip_start_angle` | 35.0° | Slope angle where tipping becomes possible |
+| `tip_full_angle` | 55.0° | Slope angle where tipping is fully enabled |
+| `roll_risk_threshold` | 0.5 | How much bike_right must point downhill (0-1) |
+| `tip_safe_speed` | 6.0 m/s | Speed above which tipping is fully prevented |
+| `tip_torque_strength` | 200.0 Nm | Torque applied to accelerate tip-over |
 | `crash_impact_threshold` | 15.0 | Impulse to trigger crash window |
 | `crash_window_duration` | 0.5s | Duration of reduced stabilization |
+
+**Roll-Risk Detection**: The tipping system now uses `roll_risk = abs(bike_right · downhill_dir)` to determine if the bike is at risk of tipping. This measures how much the bike's right axis aligns with the downhill direction (0 = stable, 1 = max risk).
+
+**Blend System**: Instead of hard thresholds, tipping uses smooth blending:
+- `slope_blend`: Ramps from 0 at `tip_start_angle` to 1 at `tip_full_angle`
+- `speed_blend`: 1 at standstill, 0 at `tip_safe_speed` (no hard cutoff)
+- `_tip_blend = slope_blend * speed_blend` controls stabilization strength and tip-over assist
 
 ### Ground Probing
 
@@ -475,64 +485,110 @@ enum StabilityMode { AIR, NORMAL_GROUNDED, STEEP_SIDEWAYS, CRASH_WINDOW }
 |------|-----------|------------------------|
 | `AIR` | Not grounded | None (full trick control) |
 | `NORMAL_GROUNDED` | On normal terrain | Strong (500.0) - bike never falls |
-| `STEEP_SIDEWAYS` | Steep + across slope + slow | Very weak (40.0) + tip-over assist |
+| `STEEP_SIDEWAYS` | Steep + roll risk + slow | Blended strength + tip-over assist |
 | `CRASH_WINDOW` | After impact | Minimal (4.0) - prevents instant recovery |
+
+### Roll-Risk Detection
+
+The tipping system uses **roll-risk** instead of the old "across slope" detection. Roll-risk measures how much the bike's RIGHT axis aligns with the downhill direction:
+
+```gdscript
+func _compute_roll_risk() -> float:
+    # 0 = bike_right is across slope (safe)
+    # 1 = bike_right points downhill (max roll risk)
+    if not _is_grounded:
+        return 0.0
+    
+    var gravity_slope: Vector3 = Vector3.DOWN - _ground_up * Vector3.DOWN.dot(_ground_up)
+    if gravity_slope.length() < 0.001:
+        return 0.0  # flat
+    
+    var downhill_dir: Vector3 = gravity_slope.normalized()
+    var bike_right: Vector3 = global_transform.basis.x
+    return absf(bike_right.dot(downhill_dir))
+```
 
 ### Tip-Over Assist
 
-When in `STEEP_SIDEWAYS` mode and the bike is tilted past a threshold angle (~25°), a destabilizing torque is applied to accelerate the natural fall. This creates the "angle + speed" behavior where:
-- **At high speed (>6 m/s)**: Bike stays stable even on steep sideways slopes
-- **At low speed (<6 m/s)**: Bike tips over naturally when tilted on steep slopes
+When in `STEEP_SIDEWAYS` mode, the tipping system uses a **blend factor** (`_tip_blend`) to smoothly transition between stable and tipping states. The blend is computed from:
+- **Slope blend**: 0 at `tip_start_angle`, 1 at `tip_full_angle`
+- **Speed blend**: 1 at standstill, 0 at `tip_safe_speed` (no hard cutoff)
+- **Final blend**: `_tip_blend = slope_blend * speed_blend`
 
 ```gdscript
 func _update_stability_mode(state: PhysicsDirectBodyState3D) -> void:
-    # Impact detection
-    var velocity_delta: Vector3 = state.linear_velocity - _prev_velocity
-    var impact_magnitude: float = velocity_delta.length() / delta
-    
-    if impact_magnitude > crash_impact_threshold * 100.0:
-        _crash_window_timer = crash_window_duration
-        _stability_mode = StabilityMode.CRASH_WINDOW
-        return
-    
-    if _crash_window_timer > 0:
-        _stability_mode = StabilityMode.CRASH_WINDOW
-        return
+    # ... (impact detection unchanged) ...
     
     if not _is_grounded:
         _stability_mode = StabilityMode.AIR
+        _tip_blend = 0.0
         return
     
-    # Check for STEEP_SIDEWAYS conditions
-    var is_steep: bool = _ground_up.y < steep_slope_threshold
-    _across_slope_factor = _compute_across_slope_factor()
-    var is_across: bool = _across_slope_factor > across_slope_threshold
-    var is_slow: bool = _relative_velocity.length() < wall_tip_speed
+    # Compute actual slope angle in degrees
+    var slope_dot: float = clampf(_ground_up.y, -1.0, 1.0)
+    var slope_angle: float = rad_to_deg(acos(slope_dot))  # 0° = flat, 90° = wall
     
-    if is_steep and is_across and is_slow:
+    var is_steep: bool = slope_angle > tip_start_angle
+    _roll_risk = _compute_roll_risk()
+    var is_at_risk: bool = _roll_risk > roll_risk_threshold
+    
+    if is_steep and is_at_risk:
         _stability_mode = StabilityMode.STEEP_SIDEWAYS
+        
+        # Smooth blending
+        var slope_blend: float = clampf(inverse_lerp(tip_start_angle, tip_full_angle, slope_angle), 0.0, 1.0)
+        var speed_blend: float = clampf(1.0 - (_relative_velocity.length() / tip_safe_speed), 0.0, 1.0)
+        _tip_blend = slope_blend * speed_blend
     else:
         _stability_mode = StabilityMode.NORMAL_GROUNDED
+        _tip_blend = 0.0
 ```
 
 ### Torque-Based Stabilization
 
-Uses physics torque (not direct rotation writes) for smooth stability. Includes tip-over assist for steep sideways slopes.
+Uses physics torque (not direct rotation writes) for smooth stability. Stabilization strength is **blended** based on `_tip_blend`:
 
 ```gdscript
 func _apply_stabilization(state: PhysicsDirectBodyState3D, steer_input: float) -> void:
     if _stability_mode == StabilityMode.AIR:
-        return  # No stabilization in air
+        return
     
-    var bike_up: Vector3 = global_transform.basis.y
+    # ... (target orientation calculation) ...
     
-    # === TIP-OVER ASSIST ===
-    # In STEEP_SIDEWAYS mode, when tilted past threshold, apply destabilizing torque
-    if _stability_mode == StabilityMode.STEEP_SIDEWAYS:
-        var tilt_from_ground: float = 1.0 - bike_up.dot(_ground_up)
-        if tilt_from_ground > 0.3:  # ~25 degrees
-            # Apply torque in fall direction to accelerate tip-over
-            # ... (tip-over logic)
+    # Blended strength selection
+    match _stability_mode:
+        StabilityMode.NORMAL_GROUNDED:
+            upright_strength = normal_upright_strength
+            damping_strength = normal_roll_damping
+        StabilityMode.STEEP_SIDEWAYS:
+            # Blend from normal to steep based on _tip_blend
+            upright_strength = lerpf(normal_upright_strength, steep_upright_strength, _tip_blend)
+            damping_strength = lerpf(normal_roll_damping, steep_roll_damping, _tip_blend)
+    
+    # Apply stabilization torque...
+    
+    # Tip-over assist (separate function)
+    _apply_tip_over_assist(state)
+
+
+func _apply_tip_over_assist(state: PhysicsDirectBodyState3D) -> void:
+    if _stability_mode != StabilityMode.STEEP_SIDEWAYS or _tip_blend < 0.05:
+        return
+    
+    var gravity_slope: Vector3 = Vector3.DOWN - _ground_up * Vector3.DOWN.dot(_ground_up)
+    var downhill_dir: Vector3 = gravity_slope.normalized()
+    
+    var bike_right: Vector3 = global_transform.basis.x
+    var roll_axis: Vector3 = global_transform.basis.z
+    
+    # +1 = downhill to right, -1 = downhill to left
+    var downhill_side: float = signf(bike_right.dot(downhill_dir))
+    
+    # Tip strength ramps from threshold to full risk
+    var risk_factor: float = clampf((_roll_risk - roll_risk_threshold) / (1.0 - roll_risk_threshold), 0.0, 1.0)
+    var tip_amt: float = _tip_blend * risk_factor
+    
+    state.apply_torque(roll_axis * -downhill_side * tip_amt * tip_torque_strength)
             return  # Skip normal stabilization when actively tipping
     
     # Target includes lean into turns
@@ -604,26 +660,36 @@ func _apply_roll_damping(state: PhysicsDirectBodyState3D) -> void:
 
 ### Dynamic Center of Mass
 
-Center of mass lowers when grounded for stability, returns to normal in air for trick responsiveness:
+Center of mass shifts when grounded for stability:
+- **Lower Y**: Harder to tip over
+- **Forward Z**: Counteracts acceleration-induced pitch (prevents rear wheel lift at speed)
+
+Returns to normal in air for trick responsiveness:
 
 ```gdscript
 func _update_center_of_mass(delta: float) -> void:
-    var target_y: float = grounded_com_offset if _is_grounded else 0.0  # -0.15 or 0
+    var target_y: float = grounded_com_offset if _is_grounded else 0.0
+    var target_z: float = grounded_com_forward if _is_grounded else 0.0
     var current_com: Vector3 = center_of_mass
     var new_y: float = lerpf(current_com.y, target_y, 10.0 * delta)
-    center_of_mass = Vector3(current_com.x, new_y, current_com.z)
+    var new_z: float = lerpf(current_com.z, target_z, 10.0 * delta)
+    center_of_mass = Vector3(current_com.x, new_y, new_z)
 ```
 
 ---
 
 ## Suspension System
 
-Soft-body spring-damper suspension at each wheel:
+Soft-body spring-damper suspension at each wheel with **platform-relative damping**:
 
 ```gdscript
 func _apply_suspension(delta: float) -> void:
     _prev_front_compression = _front_suspension_compression
     _prev_rear_compression = _rear_suspension_compression
+    
+    # Get platform vertical velocity for relative damping
+    # This prevents bouncing when standing on moving platforms
+    var platform_vertical_vel: float = _surface_velocity.y
     
     if _front_grounded:
         var probe_origin: Vector3 = _front_wheel_probe.global_position
@@ -635,8 +701,10 @@ func _apply_suspension(delta: float) -> void:
         _front_suspension_compression = clamp(_front_suspension_compression, 
                                                -max_suspension_travel, max_suspension_travel)
         
-        # Compression velocity for damping
-        var compression_velocity: float = (_front_suspension_compression - _prev_front_compression) / delta
+        # Compression velocity RELATIVE TO PLATFORM for damping
+        # Raw velocity includes platform motion; subtract it so damping doesn't fight the platform
+        var raw_compression_velocity: float = (_front_suspension_compression - _prev_front_compression) / delta
+        var compression_velocity: float = raw_compression_velocity - platform_vertical_vel
         
         # Spring-damper force: F = k*x - c*v
         var spring_force: float = suspension_stiffness * _front_suspension_compression
@@ -655,8 +723,10 @@ func _apply_suspension(delta: float) -> void:
         _front_suspension_compression = lerp(_front_suspension_compression, 0.0, 5.0 * delta)
         _front_wheel_visual_offset = lerp(_front_wheel_visual_offset, 0.0, 5.0 * delta)
     
-    # Same logic for rear wheel...
+    # Same logic for rear wheel (also uses platform-relative damping)...
 ```
+
+**Key insight**: The damping force should only resist the bike's motion relative to the platform, not the platform's absolute motion. By subtracting `platform_vertical_vel` from the compression velocity, the suspension "rides along" with moving platforms smoothly.
 
 ---
 
@@ -1065,7 +1135,9 @@ The bike physics system is a sophisticated trials-style controller built on:
 
 Key design choices:
 - Torque-based stabilization works WITH the physics solver
-- **Tip-over assist** accelerates natural falling when slow on steep sideways slopes
+- **Roll-risk detection** uses `bike_right · downhill_dir` for reliable sideways-on-slope detection
+- **Smooth blend factors** for tipping (slope_blend × speed_blend) instead of hard thresholds
+- **Tip-over assist** accelerates natural falling using roll-risk direction
 - **True free-roll** on slopes - gravity handles downhill motion naturally
 - Normal smoothing prevents jitter on rough terrain
 - Relative velocity enables moving platform support

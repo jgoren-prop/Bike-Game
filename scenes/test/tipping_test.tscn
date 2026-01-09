@@ -1,0 +1,113 @@
+[gd_scene load_steps=10 format=3 uid="uid://tip_test_001"]
+
+[ext_resource type="Script" path="res://scripts/test/tipping_test.gd" id="1_script"]
+
+[sub_resource type="BoxMesh" id="1"]
+size = Vector3(100, 0.5, 100)
+
+[sub_resource type="BoxShape3D" id="2"]
+size = Vector3(100, 0.5, 100)
+
+[sub_resource type="BoxMesh" id="3"]
+size = Vector3(10, 0.3, 15)
+
+[sub_resource type="BoxShape3D" id="4"]
+size = Vector3(10, 0.3, 15)
+
+[sub_resource type="StandardMaterial3D" id="5"]
+albedo_color = Color(0.2, 0.25, 0.2, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="6"]
+albedo_color = Color(0.3, 0.5, 0.3, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="7"]
+albedo_color = Color(0.5, 0.5, 0.3, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="8"]
+albedo_color = Color(0.5, 0.3, 0.3, 1)
+roughness = 0.8
+
+[node name="TippingTest" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 20, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("1")
+surface_material_override/0 = SubResource("5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("2")
+
+[node name="Ramps" type="Node3D" parent="."]
+
+[node name="Ramp30" type="StaticBody3D" parent="Ramps"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, -15, 3.5, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ramps/Ramp30"]
+mesh = SubResource("3")
+surface_material_override/0 = SubResource("6")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ramps/Ramp30"]
+shape = SubResource("4")
+
+[node name="SpawnPoint" type="Marker3D" parent="Ramps/Ramp30"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1.5, 0)
+
+[node name="Label3D" type="Label3D" parent="Ramps/Ramp30"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+text = "30° Ramp (Press 1)"
+font_size = 128
+
+[node name="Ramp45" type="StaticBody3D" parent="Ramps"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 5, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ramps/Ramp45"]
+mesh = SubResource("3")
+surface_material_override/0 = SubResource("7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ramps/Ramp45"]
+shape = SubResource("4")
+
+[node name="SpawnPoint" type="Marker3D" parent="Ramps/Ramp45"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1.5, 0)
+
+[node name="Label3D" type="Label3D" parent="Ramps/Ramp45"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+text = "45° Ramp (Press 2)"
+font_size = 128
+
+[node name="Ramp60" type="StaticBody3D" parent="Ramps"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 15, 6.5, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ramps/Ramp60"]
+mesh = SubResource("3")
+surface_material_override/0 = SubResource("8")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ramps/Ramp60"]
+shape = SubResource("4")
+
+[node name="SpawnPoint" type="Marker3D" parent="Ramps/Ramp60"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1.5, 0)
+
+[node name="Label3D" type="Label3D" parent="Ramps/Ramp60"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+text = "60° Ramp (Press 3)"
+font_size = 128
+
+[node name="Instructions" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, -15)
+text = "TIPPING TEST
+1/2/3 = Switch ramp
+R = Reset
+F1 = Dev Panel"
+font_size = 96
