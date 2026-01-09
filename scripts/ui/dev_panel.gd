@@ -26,6 +26,7 @@ var _bike: BikeController = null
 @onready var _drift_kickout_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftKickoutSlider
 @onready var _drift_steer_boost_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftSteerBoostSlider
 @onready var _pitch_stab_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/PitchStabSlider
+@onready var _wall_grip_speed_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/WallGripSpeedSlider
 
 # Jump slider
 @onready var _jump_slider: HSlider = $Panel/ScrollContainer/VBox/FrictionSection/JumpSlider
@@ -44,6 +45,17 @@ var _bike: BikeController = null
 @onready var _camera_height_slider: HSlider = $Panel/ScrollContainer/VBox/CameraSection/CameraHeightSlider
 @onready var _camera_angle_slider: HSlider = $Panel/ScrollContainer/VBox/CameraSection/CameraAngleSlider
 
+# Suspension sliders
+@onready var _susp_stiffness_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/SuspStiffnessSlider
+@onready var _susp_damping_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/SuspDampingSlider
+@onready var _susp_rest_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/SuspRestSlider
+@onready var _susp_travel_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/SuspTravelSlider
+
+# Tire grip sliders
+@onready var _tire_grip_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/TireGripSlider
+@onready var _climb_force_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/ClimbForceSlider
+@onready var _bump_pop_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/BumpPopSlider
+
 # Value labels
 @onready var _max_speed_value: Label = $Panel/ScrollContainer/VBox/MovementSection/MaxSpeedValue
 @onready var _engine_force_value: Label = $Panel/ScrollContainer/VBox/MovementSection/AccelerationValue
@@ -59,6 +71,7 @@ var _bike: BikeController = null
 @onready var _drift_kickout_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftKickoutValue
 @onready var _drift_steer_boost_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftSteerBoostValue
 @onready var _pitch_stab_value: Label = $Panel/ScrollContainer/VBox/GripSection/PitchStabValue
+@onready var _wall_grip_speed_value: Label = $Panel/ScrollContainer/VBox/GripSection/WallGripSpeedValue
 
 @onready var _jump_value: Label = $Panel/ScrollContainer/VBox/FrictionSection/JumpValue
 
@@ -74,6 +87,17 @@ var _bike: BikeController = null
 @onready var _camera_dist_value: Label = $Panel/ScrollContainer/VBox/CameraSection/CameraDistValue
 @onready var _camera_height_value: Label = $Panel/ScrollContainer/VBox/CameraSection/CameraHeightValue
 @onready var _camera_angle_value: Label = $Panel/ScrollContainer/VBox/CameraSection/CameraAngleValue
+
+# Suspension value labels
+@onready var _susp_stiffness_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/SuspStiffnessValue
+@onready var _susp_damping_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/SuspDampingValue
+@onready var _susp_rest_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/SuspRestValue
+@onready var _susp_travel_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/SuspTravelValue
+
+# Tire grip value labels
+@onready var _tire_grip_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/TireGripValue
+@onready var _climb_force_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/ClimbForceValue
+@onready var _bump_pop_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/BumpPopValue
 
 
 @onready var _copy_button: Button = $Panel/ScrollContainer/VBox/CopyButton
@@ -157,6 +181,8 @@ func _connect_sliders() -> void:
 		_drift_steer_boost_slider.value_changed.connect(_on_drift_steer_boost_changed)
 	if _pitch_stab_slider:
 		_pitch_stab_slider.value_changed.connect(_on_pitch_stab_changed)
+	if _wall_grip_speed_slider:
+		_wall_grip_speed_slider.value_changed.connect(_on_wall_grip_speed_changed)
 	if _jump_slider:
 		_jump_slider.value_changed.connect(_on_jump_changed)
 	# Arcade sliders
@@ -181,6 +207,22 @@ func _connect_sliders() -> void:
 		_camera_height_slider.value_changed.connect(_on_camera_height_changed)
 	if _camera_angle_slider:
 		_camera_angle_slider.value_changed.connect(_on_camera_angle_changed)
+	# Suspension sliders
+	if _susp_stiffness_slider:
+		_susp_stiffness_slider.value_changed.connect(_on_susp_stiffness_changed)
+	if _susp_damping_slider:
+		_susp_damping_slider.value_changed.connect(_on_susp_damping_changed)
+	if _susp_rest_slider:
+		_susp_rest_slider.value_changed.connect(_on_susp_rest_changed)
+	if _susp_travel_slider:
+		_susp_travel_slider.value_changed.connect(_on_susp_travel_changed)
+	# Tire grip sliders
+	if _tire_grip_slider:
+		_tire_grip_slider.value_changed.connect(_on_tire_grip_changed)
+	if _climb_force_slider:
+		_climb_force_slider.value_changed.connect(_on_climb_force_changed)
+	if _bump_pop_slider:
+		_bump_pop_slider.value_changed.connect(_on_bump_pop_changed)
 
 
 func _sync_sliders_from_bike() -> void:
@@ -224,6 +266,9 @@ func _sync_sliders_from_bike() -> void:
 	if _pitch_stab_slider:
 		_pitch_stab_slider.value = _bike.pitch_stabilization
 		_update_value_label(_pitch_stab_value, _bike.pitch_stabilization)
+	if _wall_grip_speed_slider:
+		_wall_grip_speed_slider.value = _bike.wall_grip_speed_threshold
+		_update_value_label(_wall_grip_speed_value, _bike.wall_grip_speed_threshold, " m/s")
 	if _jump_slider:
 		_jump_slider.value = _bike.jump_impulse
 		_update_value_label(_jump_value, _bike.jump_impulse)
@@ -258,6 +303,29 @@ func _sync_sliders_from_bike() -> void:
 	if _camera_angle_slider:
 		_camera_angle_slider.value = _bike.camera_angle
 		_update_value_label(_camera_angle_value, _bike.camera_angle, "°")
+	# Suspension sliders
+	if _susp_stiffness_slider:
+		_susp_stiffness_slider.value = _bike.suspension_stiffness
+		_update_value_label(_susp_stiffness_value, _bike.suspension_stiffness)
+	if _susp_damping_slider:
+		_susp_damping_slider.value = _bike.suspension_damping
+		_update_value_label(_susp_damping_value, _bike.suspension_damping)
+	if _susp_rest_slider:
+		_susp_rest_slider.value = _bike.suspension_rest_length
+		_update_value_label(_susp_rest_value, _bike.suspension_rest_length)
+	if _susp_travel_slider:
+		_susp_travel_slider.value = _bike.max_suspension_travel
+		_update_value_label(_susp_travel_value, _bike.max_suspension_travel)
+	# Tire grip sliders
+	if _tire_grip_slider:
+		_tire_grip_slider.value = _bike.tire_grip
+		_update_value_label(_tire_grip_value, _bike.tire_grip)
+	if _climb_force_slider:
+		_climb_force_slider.value = _bike.front_climb_force
+		_update_value_label(_climb_force_value, _bike.front_climb_force)
+	if _bump_pop_slider:
+		_bump_pop_slider.value = _bike.bump_pop_strength
+		_update_value_label(_bump_pop_value, _bike.bump_pop_strength)
 
 
 func _update_value_label(label: Label, value: float, suffix: String = "") -> void:
@@ -341,6 +409,12 @@ func _on_pitch_stab_changed(value: float) -> void:
 		_update_value_label(_pitch_stab_value, value)
 
 
+func _on_wall_grip_speed_changed(value: float) -> void:
+	if _bike:
+		_bike.wall_grip_speed_threshold = value
+		_update_value_label(_wall_grip_speed_value, value, " m/s")
+
+
 func _on_jump_changed(value: float) -> void:
 	if _bike:
 		_bike.jump_impulse = value
@@ -414,6 +488,50 @@ func _on_camera_angle_changed(value: float) -> void:
 		_update_value_label(_camera_angle_value, value, "°")
 
 
+# === SUSPENSION CALLBACKS ===
+
+func _on_susp_stiffness_changed(value: float) -> void:
+	if _bike:
+		_bike.suspension_stiffness = value
+		_update_value_label(_susp_stiffness_value, value)
+
+
+func _on_susp_damping_changed(value: float) -> void:
+	if _bike:
+		_bike.suspension_damping = value
+		_update_value_label(_susp_damping_value, value)
+
+
+func _on_susp_rest_changed(value: float) -> void:
+	if _bike:
+		_bike.suspension_rest_length = value
+		_update_value_label(_susp_rest_value, value)
+
+
+func _on_susp_travel_changed(value: float) -> void:
+	if _bike:
+		_bike.max_suspension_travel = value
+		_update_value_label(_susp_travel_value, value)
+
+
+func _on_tire_grip_changed(value: float) -> void:
+	if _bike:
+		_bike.tire_grip = value
+		_update_value_label(_tire_grip_value, value)
+
+
+func _on_climb_force_changed(value: float) -> void:
+	if _bike:
+		_bike.front_climb_force = value
+		_update_value_label(_climb_force_value, value)
+
+
+func _on_bump_pop_changed(value: float) -> void:
+	if _bike:
+		_bike.bump_pop_strength = value
+		_update_value_label(_bump_pop_value, value)
+
+
 func _on_copy_pressed() -> void:
 	if not _bike:
 		return
@@ -435,6 +553,7 @@ func _on_copy_pressed() -> void:
 	text += "  Drift Kickout: %.1f\n" % _bike.drift_kickout
 	text += "  Drift Steer Boost: %.1f\n" % _bike.drift_steer_boost
 	text += "  Pitch Stability: %.1f\n" % _bike.pitch_stabilization
+	text += "  Wall Grip Speed: %.1f m/s\n" % _bike.wall_grip_speed_threshold
 	text += "\nJUMP:\n"
 	text += "  Jump Force: %.1f\n" % _bike.jump_impulse
 	text += "\nARCADE FEEL:\n"
@@ -448,6 +567,13 @@ func _on_copy_pressed() -> void:
 	text += "  Camera Distance: %.1f\n" % _bike.camera_distance
 	text += "  Camera Height: %.1f\n" % _bike.camera_height
 	text += "  Camera Angle: %.1f°\n" % _bike.camera_angle
+	text += "\nSUSPENSION:\n"
+	text += "  Stiffness: %.1f\n" % _bike.suspension_stiffness
+	text += "  Damping: %.1f\n" % _bike.suspension_damping
+	text += "  Rest Length: %.2f\n" % _bike.suspension_rest_length
+	text += "  Max Travel: %.2f\n" % _bike.max_suspension_travel
+	text += "  Tire Grip: %.2f\n" % _bike.tire_grip
+	text += "  Climb Force: %.1f\n" % _bike.front_climb_force
 
 	DisplayServer.clipboard_set(text)
 	_copy_button.text = "Copied!"

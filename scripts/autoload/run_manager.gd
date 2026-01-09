@@ -5,15 +5,11 @@ class_name RunManagerClass
 
 enum RunState { IDLE, IN_RUN, STAGE_COMPLETE, RUN_FAILED }
 
-const STAGE_TIME_LIMITS: Array[float] = [0.0, 90.0, 100.0, 110.0, 120.0, 150.0]
-const MAX_STAGE: int = 5
+const STAGE_TIME_LIMITS: Array[float] = [0.0, 180.0]
+const MAX_STAGE: int = 1
 const STAGE_SCENES: Array[String] = [
 	"",
-	"res://scenes/stages/stage_1.tscn",
-	"res://scenes/stages/stage_2.tscn",
-	"res://scenes/stages/stage_3.tscn",
-	"res://scenes/stages/stage_4.tscn",
-	"res://scenes/stages/stage_5.tscn"
+	"res://scenes/stages/volcanic_gauntlet.tscn"
 ]
 
 var current_state: RunState = RunState.IDLE

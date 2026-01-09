@@ -1,0 +1,58 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://tests/e2e/test_tire_grip_climb.gd" id="1_test"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(20, 0.5, 40)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.3, 0.35, 0.25, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(20, 0.5, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bump"]
+size = Vector3(4, 0.1, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bump"]
+size = Vector3(4, 0.1, 0.3)
+
+[node name="TireGripTest" type="Node3D"]
+script = ExtResource("1_test")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 10, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_ground")
+surface_material_override/0 = SubResource("Mat_ground")
+
+[node name="Collision" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="TestBump" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="TestBump"]
+mesh = SubResource("BoxMesh_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="TestBump"]
+shape = SubResource("BoxShape3D_bump")
+
+[node name="StatusLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -8)
+text = "TIRE GRIP CLIMB TEST
+Press R to restart"
+font_size = 48
+outline_size = 8
+
+[node name="ResultsLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2, 0)
+text = "Results will appear here..."
+font_size = 24
+outline_size = 4

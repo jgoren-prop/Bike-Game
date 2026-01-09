@@ -1,7 +1,7 @@
 extends Node3D
 class_name StageBase
 
-## Base class for all stages - handles gates, fall detection, timing
+## Base class for all stages - handles gates, fall detection, checkpoints
 
 @export var stage_number: int = 1
 @export var time_limit: float = 60.0
@@ -11,11 +11,14 @@ var _stage_active: bool = false
 var _hud: RunHUD
 var _stage_clear_overlay: StageClearOverlay
 var _run_failed_overlay: RunFailedOverlay
+var _last_checkpoint_position: Vector3
 
 @onready var start_gate: Area3D = $StartGate
 @onready var finish_gate: Area3D = $FinishGate
 @onready var fall_plane: Area3D = $FallPlane
 @onready var spawn_point: Marker3D = $SpawnPoint
+
+var _checkpoints: Array[Area3D] = []
 
 
 func _ready() -> void:
@@ -84,16 +87,26 @@ func _spawn_player() -> void:
 	# Set position after adding to tree
 	if spawn_point:
 		_player_bike.global_position = spawn_point.global_position
+		_last_checkpoint_position = spawn_point.global_position
 	else:
 		_player_bike.global_position = Vector3(0, 1, 0)
+		_last_checkpoint_position = Vector3(0, 1, 0)
+	
+	# Connect to all checkpoint areas in the scene and store them for debug teleport
+	for child in get_children():
+		if child.name.begins_with("Checkpoint") and child is Area3D:
+			child.body_entered.connect(_on_checkpoint_entered.bind(child))
+			_checkpoints.append(child)
+	
+	# Sort checkpoints by Z position
+	_checkpoints.sort_custom(func(a: Area3D, b: Area3D) -> bool: return a.global_position.z < b.global_position.z)
 
 
 func _start_stage() -> void:
 	_stage_active = true
-	# Only start a new run if we're not already in one
-	# (continue_to_next_stage already handles timer for subsequent stages)
-	if RunManager.current_state == RunManager.RunState.IDLE:
-		RunManager.start_run()
+	# Just activate the stage without starting the timer/run system
+	RunManager.current_state = RunManager.RunState.IN_RUN
+	RunManager.current_stage = stage_number
 
 
 func _on_finish_gate_entered(body: Node3D) -> void:
@@ -104,11 +117,60 @@ func _on_finish_gate_entered(body: Node3D) -> void:
 
 func _on_fall_plane_entered(body: Node3D) -> void:
 	if body == _player_bike and _stage_active:
-		_stage_active = false
-		RunManager.fail_run("Fell off the course")
+		# Respawn at last checkpoint
+		_player_bike.reset_position(_last_checkpoint_position)
+
+
+func _on_checkpoint_entered(body: Node3D, checkpoint: Area3D) -> void:
+	if body == _player_bike:
+		# Update checkpoint - spawn slightly above the checkpoint
+		_last_checkpoint_position = checkpoint.global_position + Vector3(0, 1.5, 0)
 
 
 func reset_stage() -> void:
 	if _player_bike and spawn_point:
 		_player_bike.reset_position(spawn_point.global_position)
 	_stage_active = true
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	# Debug: Press 0-9 to teleport to checkpoints
+	if not event.pressed or event.echo:
+		return
+	
+	var key_event: InputEventKey = event as InputEventKey
+	if not key_event:
+		return
+	
+	# 0 = spawn point, 1-9 = checkpoints
+	if key_event.keycode == KEY_0 or key_event.physical_keycode == KEY_0:
+		if spawn_point and _player_bike:
+			_teleport_bike(spawn_point.global_position)
+			print("Teleported to spawn point")
+	
+	# Check number keys 1-9
+	for i in range(1, 10):
+		var key_const: int = KEY_0 + i
+		if key_event.keycode == key_const or key_event.physical_keycode == key_const:
+			var checkpoint_index: int = i - 1
+			if checkpoint_index < _checkpoints.size() and _player_bike:
+				var checkpoint_pos: Vector3 = _checkpoints[checkpoint_index].global_position + Vector3(0, 1.5, 0)
+				_teleport_bike(checkpoint_pos)
+				print("Teleported to checkpoint ", i)
+			else:
+				print("Checkpoint ", i, " not found (have ", _checkpoints.size(), " checkpoints)")
+			break
+
+
+func _teleport_bike(pos: Vector3) -> void:
+	if not _player_bike:
+		return
+	
+	# For RigidBody3D, we need to properly reset physics state
+	_player_bike.linear_velocity = Vector3.ZERO
+	_player_bike.angular_velocity = Vector3.ZERO
+	_player_bike.global_transform = Transform3D(Basis.IDENTITY, pos)
+	_last_checkpoint_position = pos
+	
+	# Also call the bike's reset to clear internal state
+	_player_bike.call_deferred("reset_position", pos)

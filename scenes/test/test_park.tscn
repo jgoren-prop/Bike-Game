@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://ctestpark001"]
+[gd_scene load_steps=46 format=3 uid="uid://ctestpark001"]
 
 [ext_resource type="Script" uid="uid://bcoo1uy45xbuf" path="res://scripts/test/test_park.gd" id="1_park"]
 [ext_resource type="Script" uid="uid://do6bx1vi82o46" path="res://scripts/systems/moving_platform.gd" id="2_moving"]
@@ -12,31 +12,25 @@ size = Vector3(200, 0.5, 200)
 albedo_color = Color(0.2, 0.35, 0.15, 1)
 roughness = 0.95
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(200, 0.5, 200)
+
 [sub_resource type="BoxMesh" id="BoxMesh_gridline_x"]
 size = Vector3(200, 0.1, 0.3)
-
-[sub_resource type="BoxMesh" id="BoxMesh_gridline_z"]
-size = Vector3(0.3, 0.1, 200)
 
 [sub_resource type="StandardMaterial3D" id="Mat_gridline"]
 albedo_color = Color(0.35, 0.45, 0.3, 1)
 roughness = 0.9
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(200, 0.5, 200)
+[sub_resource type="BoxMesh" id="BoxMesh_gridline_z"]
+size = Vector3(0.3, 0.1, 200)
 
-[sub_resource type="BoxMesh" id="BoxMesh_ramp_small"]
-size = Vector3(6, 0.3, 8)
+[sub_resource type="BoxMesh" id="BoxMesh_ramp_med"]
+size = Vector3(8, 0.3, 12)
 
 [sub_resource type="StandardMaterial3D" id="Mat_ramp"]
 albedo_color = Color(0.5, 0.35, 0.25, 1)
 roughness = 0.7
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ramp_small"]
-size = Vector3(6, 0.3, 8)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ramp_med"]
-size = Vector3(8, 0.3, 12)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ramp_med"]
 size = Vector3(8, 0.3, 12)
@@ -115,6 +109,46 @@ roughness = 0.85
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_pillar"]
 size = Vector3(1.5, 2, 1.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bump_tiny"]
+size = Vector3(3, 0.05, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bump"]
+albedo_color = Color(0.6, 0.5, 0.3, 1)
+roughness = 0.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bump_tiny"]
+size = Vector3(3, 0.05, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bump_small"]
+size = Vector3(3, 0.1, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bump_small"]
+size = Vector3(3, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bump_large"]
+size = Vector3(3, 0.35, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bump_large"]
+size = Vector3(3, 0.35, 0.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bump_xl"]
+size = Vector3(3, 0.5, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bump_yellow"]
+albedo_color = Color(0.9, 0.7, 0.1, 1)
+roughness = 0.6
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bump_xl"]
+size = Vector3(3, 0.5, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bowl"]
+albedo_color = Color(0.6, 0.65, 0.7, 1)
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_bowl_floor"]
+albedo_color = Color(0.5, 0.55, 0.6, 1)
+roughness = 0.4
 
 [node name="TestPark" type="Node3D"]
 script = ExtResource("1_park")
@@ -199,10 +233,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -15)
 transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, -15, 0.5, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp15deg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.966936, -3.765997, 19.137148)
 mesh = SubResource("BoxMesh_ramp_med")
 surface_material_override/0 = SubResource("Mat_ramp")
 
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp15deg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.437872, -3.9966068, 18.877924)
 shape = SubResource("BoxShape3D_ramp_med")
 
 [node name="Ramp30deg" type="StaticBody3D" parent="RampArea"]
@@ -608,3 +644,257 @@ surface_material_override/0 = SubResource("Mat_concrete")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/ObstacleCourse/Pillar5"]
 shape = SubResource("BoxShape3D_pillar")
+
+[node name="BumpTestArea" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
+
+[node name="AreaSpawn" type="Marker3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -5)
+
+[node name="Label" type="Label3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -8)
+text = "SUSPENSION TEST - BUMP SIZES"
+font_size = 48
+
+[node name="BumpTiny1" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpTiny1"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpTiny1"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="BumpTiny2" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 2)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpTiny2"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpTiny2"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="BumpTiny3" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 4)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpTiny3"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpTiny3"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="BumpSmall1" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 8)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpSmall1"]
+mesh = SubResource("BoxMesh_bump_small")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpSmall1"]
+shape = SubResource("BoxShape3D_bump_small")
+
+[node name="BumpSmall2" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 10)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpSmall2"]
+mesh = SubResource("BoxMesh_bump_small")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpSmall2"]
+shape = SubResource("BoxShape3D_bump_small")
+
+[node name="BumpSmall3" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 12)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpSmall3"]
+mesh = SubResource("BoxMesh_bump_small")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpSmall3"]
+shape = SubResource("BoxShape3D_bump_small")
+
+[node name="BumpLarge1" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.175, 24)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpLarge1"]
+mesh = SubResource("BoxMesh_bump_large")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpLarge1"]
+shape = SubResource("BoxShape3D_bump_large")
+
+[node name="BumpLarge2" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.175, 26)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpLarge2"]
+mesh = SubResource("BoxMesh_bump_large")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpLarge2"]
+shape = SubResource("BoxShape3D_bump_large")
+
+[node name="BumpXL1" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 30)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpXL1"]
+mesh = SubResource("BoxMesh_bump_xl")
+surface_material_override/0 = SubResource("Mat_bump_yellow")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpXL1"]
+shape = SubResource("BoxShape3D_bump_xl")
+
+[node name="BumpXL2" type="StaticBody3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 33)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/BumpXL2"]
+mesh = SubResource("BoxMesh_bump_xl")
+surface_material_override/0 = SubResource("Mat_bump_yellow")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/BumpXL2"]
+shape = SubResource("BoxShape3D_bump_xl")
+
+[node name="WashboardSection" type="Node3D" parent="BumpTestArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 0)
+
+[node name="WashboardLabel" type="Label3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -2)
+text = "WASHBOARD"
+
+[node name="WB1" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB1"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB1"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB2" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 0.6)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB2"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB2"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB3" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 1.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB3"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB3"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB4" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 1.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB4"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB4"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB5" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 2.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB5"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB5"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB6" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 3)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB6"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB6"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB7" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 3.6)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB7"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB7"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB8" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 4.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB8"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB8"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB9" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 4.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB9"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB9"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="WB10" type="StaticBody3D" parent="BumpTestArea/WashboardSection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 5.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="BumpTestArea/WashboardSection/WB10"]
+mesh = SubResource("BoxMesh_bump_tiny")
+surface_material_override/0 = SubResource("Mat_bump")
+
+[node name="Collision" type="CollisionShape3D" parent="BumpTestArea/WashboardSection/WB10"]
+shape = SubResource("BoxShape3D_bump_tiny")
+
+[node name="SkateparkBowl" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2773294, 60)
+
+[node name="Label" type="Label3D" parent="SkateparkBowl"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -18)
+text = "SKATEPARK BOWL"
+font_size = 64
+
+[node name="BowlShape" type="CSGCombiner3D" parent="SkateparkBowl"]
+use_collision = true
+
+[node name="ConcreteSlab" type="CSGBox3D" parent="SkateparkBowl/BowlShape"]
+size = Vector3(30, 4, 30)
+material = SubResource("Mat_bowl")
+
+[node name="BowlCutter" type="CSGSphere3D" parent="SkateparkBowl/BowlShape"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.0829954, 0)
+operation = 2
+radius = 12.0
+radial_segments = 32
+rings = 16
+
+[node name="DeepCenterCutter" type="CSGSphere3D" parent="SkateparkBowl/BowlShape"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+operation = 2
+radius = 8.0
+radial_segments = 24
+rings = 12
+
+[node name="Coping" type="CSGTorus3D" parent="SkateparkBowl/BowlShape"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+inner_radius = 11.5
+outer_radius = 12.0
+sides = 32
+material = SubResource("Mat_bowl_floor")

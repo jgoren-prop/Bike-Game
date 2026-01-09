@@ -6,6 +6,8 @@ class_name GameManagerClass
 enum GameState { MENU, PLAYING, PAUSED }
 
 var current_state: GameState = GameState.MENU
+var total_runs: int = 0
+var best_stage: int = 0
 
 signal state_changed(new_state: GameState)
 

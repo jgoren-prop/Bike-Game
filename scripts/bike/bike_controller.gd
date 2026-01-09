@@ -6,16 +6,21 @@ class_name BikeController
 
 # === PHYSICS PARAMETERS ===
 # Movement
-@export var engine_force: float = 1300.0     # Forward thrust (Newtons)
+@export var engine_force: float = 2100.0     # Forward thrust (Newtons)
 @export var brake_force: float = 1000.0      # Braking force (snappy stops)
-@export var max_speed: float = 16.0          # Speed limiter (m/s)
+@export var max_speed: float = 21.0          # Engine-limited speed on flat ground (m/s)
+@export var downhill_speed_bonus: float = 1.5 # Multiplier for max speed when going downhill (gravity assist)
+
+# Momentum
+@export var bike_mass: float = 95.0          # Mass (kg)
+@export var bike_drag: float = 0.08          # Linear damping - lower for smoother landings
 
 # Steering
 @export var steer_torque: float = 250.0      # Yaw torque for turning
 @export var steer_speed_factor: float = 0.4  # Less steering at high speed
 
 # Balance/Lean (W = throttle + tilt forward, S = brake/tilt back)
-@export var lean_torque: float = 200.0       # Pitch torque from input
+@export var lean_torque: float = 400.0       # Pitch torque from input
 @export var pitch_stabilization: float = 120.0 # Pitch stability when grounded
 
 # Arcade Handling (direct control when not drifting)
@@ -26,13 +31,14 @@ class_name BikeController
 @export var max_lean_angle: float = 0.6      # ~35 degrees max lean (radians)
 
 # Jump
-@export var jump_impulse: float = 300.0      # Upward impulse when jumping
+@export var jump_impulse: float = 600.0      # Impulse when jumping (perpendicular to bike bottom)
 
 # Arcade Feel Parameters
+@export var angular_damping_value: float = 0.8  # Angular damping (rotation resistance)
 @export var air_pitch_torque: float = 350.0   # Air flip responsiveness
 @export var air_yaw_torque: float = 180.0      # Air spin responsiveness
 @export var fov_boost: float = 1.0            # Max FOV increase at top speed
-@export var landing_squash_amount: float = 0.1  # Visual squash on landing
+@export var landing_squash_amount: float = 0.10  # Visual squash on landing
 @export var disable_visual_effects: bool = false  # Debug: disable visual lean/squash
 
 # Camera Parameters
@@ -41,6 +47,20 @@ class_name BikeController
 @export var camera_height: float = 3.0        # Height above bike
 @export var camera_angle: float = 16.0        # Pitch angle (degrees) - how much camera looks down
 
+# Suspension Parameters
+@export var suspension_stiffness: float = 60.0    # Spring force (N/m) - softer for better landings
+@export var suspension_damping: float = 40.0      # Damper to prevent oscillation - lower for more bounce
+@export var suspension_rest_length: float = 0.55  # Neutral suspension position
+@export var max_suspension_travel: float = 0.35   # Max compression/extension - more travel for hard landings
+
+# Tire Grip Parameters
+@export var tire_grip: float = 5.00               # How well tires climb obstacles (0 = no grip, 5+ = very sticky)
+@export var front_climb_force: float = 1200.0     # Force to help front wheel climb bumps (needs to exceed bike weight)
+@export var bump_pop_strength: float = 0.3        # How strong the "pop" assist is when stuck on bumps (0-1)
+
+# Wall Grip Parameters (speed-dependent stability on angled walls)
+@export var wall_grip_speed_threshold: float = 9.0  # Speed (m/s) for full wall grip; below this, bike tips on steep sideways walls
+
 # === INTERNAL STATE ===
 var _front_grounded: bool = false
 var _rear_grounded: bool = false
@@ -48,6 +68,15 @@ var _front_contact_point: Vector3
 var _rear_contact_point: Vector3
 var _front_normal: Vector3
 var _rear_normal: Vector3
+
+# Suspension state
+var _front_suspension_compression: float = 0.0  # Current compression (0 = rest, positive = compressed)
+var _rear_suspension_compression: float = 0.0
+var _front_wheel_visual_offset: float = 0.0     # Visual offset for wheel position
+var _rear_wheel_visual_offset: float = 0.0
+var _prev_front_compression: float = 0.0        # For velocity calculation
+var _prev_rear_compression: float = 0.0
+
 
 var _camera_yaw: float = 0.0
 var _mouse_control_strength: float = 0.0  # 1.0 = full mouse control, 0.0 = full auto-follow
@@ -66,6 +95,7 @@ const WHEEL_RADIUS: float = 0.35
 # Landing impact feel
 var _was_airborne: bool = false
 var _landing_squash: float = 0.0
+var _landing_grace_timer: float = 0.0  # Reduces alignment right after landing
 
 
 # Node references
@@ -83,12 +113,55 @@ var _landing_squash: float = 0.0
 signal speed_changed(speed: float)
 
 
+var _bump_assist_active: bool = false  # Track if we're currently assisting a bump climb
+
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	# Bump assist detection: check if stuck against an obstacle while accelerating
+	# We ONLY detect here - the actual torque is applied in _physics_process using
+	# the same wheelie mechanic (which correctly lifts the FRONT wheel)
+	_bump_assist_active = false
+	
+	if not Input.is_action_pressed("accelerate"):
+		return
+	
+	var dominated_forward: Vector3 = global_transform.basis.z
+	var forward_vel: float = state.linear_velocity.dot(dominated_forward)
+	
+	# Only assist when moving slowly (stuck)
+	if forward_vel > 3.0:
+		return
+	
+	# Check contacts for blocking obstacles
+	for i in state.get_contact_count():
+		var contact_normal: Vector3 = state.get_contact_local_normal(i)
+		var blocking: float = -contact_normal.dot(dominated_forward)
+		var steepness: float = 1.0 - abs(contact_normal.y)
+		
+		if blocking > 0.2 and steepness > 0.2:
+			_bump_assist_active = true
+			# NO upward velocity boost - that lifts the whole bike (including back)
+			# The wheelie torque in _physics_process will lift just the front
+			break
+
+
 func _ready() -> void:
+	# Apply RigidBody3D physics properties from exported vars
+	mass = bike_mass
+	linear_damp = bike_drag
+	angular_damp = angular_damping_value
+	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	# Make camera independent of bike rotation (won't flip when bike flips)
 	_camera_pivot.top_level = true
 	_camera_pivot.global_position = global_position + Vector3(0, 1, 0)
 	_camera_pivot.rotation.y = _camera_yaw
+	
+	# Ensure lean_back input exists (in case project.godot wasn't reloaded)
+	if not InputMap.has_action("lean_back"):
+		InputMap.add_action("lean_back")
+		var key_event := InputEventKey.new()
+		key_event.physical_keycode = KEY_Q
+		InputMap.action_add_event("lean_back", key_event)
 
 
 func _input(event: InputEvent) -> void:
@@ -112,11 +185,13 @@ func _handle_mouse_look(event: InputEventMouseMotion) -> void:
 
 func _physics_process(delta: float) -> void:
 	_check_ground()
+	_apply_suspension(delta)
 
 	var throttle: float = 1.0 if Input.is_action_pressed("accelerate") else 0.0
 	var tilt: float = Input.get_axis("brake", "accelerate")  # W = throttle + tilt, S = brake + tilt back
 	var steer: float = Input.get_axis("steer_right", "steer_left")
 	var drifting: bool = Input.is_physical_key_pressed(KEY_SHIFT)  # Shift = drift mode
+	var lean_back: float = 1.0 if Input.is_action_pressed("lean_back") else 0.0  # Q = lean back for wheelies
 
 	# Get bike's forward direction (local +Z in world space, since front wheel is at +Z)
 	var forward: Vector3 = global_transform.basis.z
@@ -178,47 +253,78 @@ func _physics_process(delta: float) -> void:
 	var moving_backward: bool = linear_velocity.dot(forward) < -0.5
 
 	if is_grounded:
-		# Ground steering - works at all speeds, boosted at low speed for tight turns
-		var steer_torque_applied: Vector3 = Vector3.ZERO
+		# Ground steering - requires either throttle/brake input OR already moving
 		var current_speed: float = linear_velocity.length()
+		
+		# Only allow steering when throttling, braking, or already moving
+		# This prevents the bike from pivoting in place without any input
+		var can_steer: bool = throttle > 0 or tilt < 0 or current_speed > 0.5
+		
+		# Apply steering torque (either normal OR drift, not both)
+		if can_steer and abs(steer) > 0.01 and not drifting:
+			var steer_torque_applied: Vector3 = Vector3.ZERO
 
-		# Reduce steering at high speed (prevents oversteer at speed)
-		var high_speed_factor: float = 1.0 - (current_speed / max_speed) * steer_speed_factor
-		high_speed_factor = clamp(high_speed_factor, 0.4, 1.0)
+			# Reduce steering at high speed (prevents oversteer at speed)
+			var high_speed_factor: float = 1.0 - (current_speed / max_speed) * steer_speed_factor
+			high_speed_factor = clamp(high_speed_factor, 0.4, 1.0)
 
-		# BOOST steering at low speed for tight turns (1.5x at standstill, 1.0x at 5+ m/s)
-		var low_speed_boost: float = 1.0 + 0.5 * (1.0 - clamp(current_speed / 5.0, 0.0, 1.0))
+			# BOOST steering at low speed for tight turns (1.5x at standstill, 1.0x at 5+ m/s)
+			var low_speed_boost: float = 1.0 + 0.5 * (1.0 - clamp(current_speed / 5.0, 0.0, 1.0))
 
-		var speed_factor: float = high_speed_factor * low_speed_boost
-		var throttle_boost: float = 1.0 + abs(throttle) * 0.5
+			var speed_factor: float = high_speed_factor * low_speed_boost
+			var throttle_boost: float = 1.0 + abs(throttle) * 0.5
 
-		# Camera angle boost - how much camera is offset from bike facing
-		var camera_offset: float = _camera_yaw - global_rotation.y
-		# Normalize to [-PI, PI]
-		while camera_offset > PI:
-			camera_offset -= TAU
-		while camera_offset < -PI:
-			camera_offset += TAU
+			# Camera angle boost - how much camera is offset from bike facing
+			var camera_offset: float = _camera_yaw - global_rotation.y
+			# Normalize to [-PI, PI]
+			while camera_offset > PI:
+				camera_offset -= TAU
+			while camera_offset < -PI:
+				camera_offset += TAU
 
-		# Boost turn power when steering toward where camera is looking
-		var look_alignment: float = camera_offset * steer  # Positive when aligned
-		var camera_boost: float = 1.0 + clamp(look_alignment, 0.0, 0.5)  # Up to 1.5x boost
+			# Boost turn power when steering toward where camera is looking
+			var look_alignment: float = camera_offset * steer  # Positive when aligned
+			var camera_boost: float = 1.0 + clamp(look_alignment, 0.0, 0.5)  # Up to 1.5x boost
 
-		# Invert steering when moving backward (like a car in reverse)
-		var effective_steer: float = -steer if moving_backward else steer
+			# Invert steering when moving backward (like a car in reverse)
+			var effective_steer: float = -steer if moving_backward else steer
 
-		# Reduce steering on steep slopes (friction makes turning hard)
-		var slope_steer_factor: float = 1.0 - (slope_factor * 0.7)
+			# Reduce steering on steep slopes (friction makes turning hard)
+			var slope_steer_factor: float = 1.0 - (slope_factor * 0.7)
 
-		# Apply steering torque - grip physics handles the difference between normal and drift
-		steer_torque_applied = Vector3.UP * effective_steer * steer_torque * speed_factor * throttle_boost * camera_boost * slope_steer_factor
-		apply_torque(steer_torque_applied)
+			# Apply steering torque - normal mode only (drift has its own steering below)
+			steer_torque_applied = Vector3.UP * effective_steer * steer_torque * speed_factor * throttle_boost * camera_boost * slope_steer_factor
+			apply_torque(steer_torque_applied)
 
 		# Ground lean control (Trials-style: W/S = tilt forward/back)
 		# Use horizontal right vector to prevent yaw influence
 		var horizontal_right: Vector3 = Vector3(right.x, 0, right.z).normalized()
-		var lean_torque_applied: Vector3 = horizontal_right * tilt * lean_torque
-		apply_torque(lean_torque_applied)
+		
+		# When bump assist is active, DISABLE forward lean from W key
+		# Otherwise the forward lean fights the wheelie we're trying to do
+		if not _bump_assist_active:
+			var lean_torque_applied: Vector3 = horizontal_right * tilt * lean_torque
+			apply_torque(lean_torque_applied)
+		
+		# Q key lean back for wheelies (independent of throttle/brake tilt)
+		# Needs to overcome: forward lean from W (+200) + pitch stabilization
+		# Negative direction = lean backward (same as S tilt direction)
+		if lean_back > 0:
+			var wheelie_torque: Vector3 = horizontal_right * -lean_back * lean_torque * 4.0
+			apply_torque(wheelie_torque)
+		
+		# Bump assist: when stuck on a bump, apply UPWARD force at front wheel
+		# This lifts the front wheel directly AND creates pitch-up torque
+		if _bump_assist_active and throttle > 0:
+			# Apply upward force at front wheel position
+			# Front wheel is at local Z = 0.65 (from bike.tscn)
+			var front_wheel_offset: Vector3 = global_transform.basis * Vector3(0, 0, 0.65)
+			var lift_force: Vector3 = Vector3.UP * bump_pop_strength * 800.0
+			apply_force(lift_force, front_wheel_offset)
+			
+			# Also apply the wheelie torque for extra rotation
+			var bump_wheelie: Vector3 = horizontal_right * -bump_pop_strength * lean_torque * 2.0
+			apply_torque(bump_wheelie)
 
 		# === ARCADE VELOCITY CONTROL ===
 		if drifting:
@@ -253,6 +359,9 @@ func _physics_process(delta: float) -> void:
 				# Reduce alignment when only one wheel grounded (wheelies, stoppies, landings)
 				var both_wheels: bool = _front_grounded and _rear_grounded
 				var align_strength: float = velocity_alignment if both_wheels else velocity_alignment * 0.3
+				# Further reduce alignment during landing grace period for smooth landings
+				if _landing_grace_timer > 0:
+					align_strength *= 0.2
 				var align_factor: float = align_strength * 15.0 * delta  # Frame-rate independent
 				linear_velocity.x = lerp(linear_velocity.x, target_vel.x, align_factor)
 				linear_velocity.z = lerp(linear_velocity.z, target_vel.z, align_factor)
@@ -265,6 +374,10 @@ func _physics_process(delta: float) -> void:
 		# === AIR CONTROL ===
 		# Air pitch for flips (W/S) - very responsive
 		apply_torque(right * tilt * air_pitch_torque)
+		
+		# Q key lean back in air (for backflips)
+		if lean_back > 0:
+			apply_torque(right * -lean_back * air_pitch_torque)
 
 		# Air yaw (A/D) - spin around bike's local up axis
 		var up: Vector3 = global_transform.basis.y
@@ -306,12 +419,14 @@ func _physics_process(delta: float) -> void:
 	_rear_lean = lerp(_rear_lean, _visual_lean, rear_follow_speed)
 
 	# Gentle pitch stabilization when grounded (helps balance)
-	if is_grounded and abs(tilt) < 0.1:
+	# Disabled when leaning (tilt), doing wheelie (lean_back), bump assist, or just landed
+	if is_grounded and abs(tilt) < 0.1 and lean_back < 0.1 and not _bump_assist_active and _landing_grace_timer <= 0:
 		var current_pitch: float = global_rotation.x
 		apply_torque(right * -current_pitch * pitch_stabilization)
 
 	# === UPRIGHT STABILIZATION (arcade direct control) ===
 	# Stabilize bike perpendicular to the SLOPE, not the world
+	# Speed-dependent: at low speeds on steep sideways walls, bike tips naturally
 	if is_grounded:
 		# Get the ground normal (use rear wheel, fallback to front)
 		var ground_normal: Vector3 = Vector3.UP
@@ -320,9 +435,14 @@ func _physics_process(delta: float) -> void:
 		elif _front_grounded:
 			ground_normal = _front_normal
 
+		# Calculate speed-based grip factor (0 = no grip, 1 = full grip)
+		var current_speed: float = linear_velocity.length()
+		var speed_grip_factor: float = clamp(current_speed / wall_grip_speed_threshold, 0.0, 1.0)
+
 		# Calculate target roll to be perpendicular to slope
 		# But only when facing up/down the slope, not across it
 		var target_roll: float = 0.0
+		var facing_slope: float = 1.0  # Track how much we're facing up/down slope
 		if slope_factor > 0.02:  # Adjust on even slight slopes
 			# Get slope's downhill direction (horizontal component of normal, inverted)
 			var slope_horizontal: Vector3 = Vector3(ground_normal.x, 0, ground_normal.z)
@@ -330,39 +450,59 @@ func _physics_process(delta: float) -> void:
 				slope_horizontal = slope_horizontal.normalized()
 				# How much are we facing up/down vs across the slope? (1 = up/down, 0 = across)
 				var forward_horizontal: Vector3 = Vector3(forward.x, 0, forward.z).normalized()
-				var facing_slope: float = abs(forward_horizontal.dot(slope_horizontal))
+				facing_slope = abs(forward_horizontal.dot(slope_horizontal))
 
 				# Only apply slope roll when facing up/down the slope
 				var slope_right_component: float = ground_normal.dot(right)
 				target_roll = asin(clamp(-slope_right_component, -1.0, 1.0)) * facing_slope
 
+		# Speed-dependent stabilization on ANY slope
+		# At 0 speed: 15% (tips fairly quickly), at threshold speed: 100% (full control)
+		var stabilization_strength: float = lerp(0.15, 1.0, speed_grip_factor)
+		# On flat ground, always full stabilization
+		if slope_factor < 0.1:
+			stabilization_strength = 1.0
+
 		# Lerp roll toward slope-aligned orientation (faster on steeper slopes)
-		var roll_lerp_speed: float = 0.3 + slope_factor * 0.4  # 0.3 flat, up to 0.7 on steep
+		# Scale by stabilization_strength so slow bikes on slopes tip naturally
+		var roll_lerp_speed: float = (0.3 + slope_factor * 0.4) * stabilization_strength  # 0.3 flat, up to 0.7 on steep
 		global_rotation.z = lerp(global_rotation.z, target_roll, roll_lerp_speed)
 
-		# Kill roll angular velocity
+		# Kill roll angular velocity (also scaled by stabilization strength)
 		var horizontal_forward: Vector3 = Vector3(forward.x, 0, forward.z).normalized()
 		if horizontal_forward.length() > 0.1:
 			var roll_ang_vel: float = angular_velocity.dot(horizontal_forward)
-			angular_velocity -= horizontal_forward * roll_ang_vel * 0.5
+			angular_velocity -= horizontal_forward * roll_ang_vel * 0.5 * stabilization_strength
 	# No roll correction when airborne - allow full aerial freedom for flips
 
 	# === SLOPE GRIP (extra stability on steep surfaces) ===
+	# Speed-dependent: grip scales with velocity (slow = weak grip, fast = strong grip)
 	if is_grounded and slope_factor > 0.1:
-		# Dampen angular velocity more on slopes - resist flipping
-		var slope_damp: float = slope_factor * 0.8
+		# Calculate speed-based grip factor for slope grip
+		var current_speed: float = linear_velocity.length()
+		var slope_speed_grip: float = clamp(current_speed / wall_grip_speed_threshold, 0.0, 1.0)
+		
+		# Grip scales with speed on ALL slopes (not just steep ones)
+		# At 0 speed: 15% grip, at threshold speed: 100% grip
+		var grip_modifier: float = lerp(0.15, 1.0, slope_speed_grip)
+		
+		# Dampen angular velocity more on slopes - resist flipping (scaled by grip)
+		var slope_damp: float = slope_factor * 0.8 * grip_modifier
 		angular_velocity *= (1.0 - slope_damp * delta * 15.0)
 
 		# Reduce lateral velocity on slopes (friction keeps bike stuck to surface)
 		var lateral_vel: float = linear_velocity.dot(right)
-		linear_velocity -= right * lateral_vel * slope_factor * 0.5
+		linear_velocity -= right * lateral_vel * slope_factor * 0.5 * grip_modifier
 
 		# Anti-slide: counter gravity's downhill pull to prevent unwanted sliding/turning
+		# Only apply when moving - at low speed, bike rolls backwards naturally with gravity
+		# Ramp from 0% at 0 speed to 100% at 20% of threshold speed
+		var anti_slide_factor: float = clamp(current_speed / (wall_grip_speed_threshold * 0.2), 0.0, 1.0)
 		var ground_normal: Vector3 = _rear_normal if _rear_grounded else _front_normal
 		var downhill_dir: Vector3 = Vector3(ground_normal.x, 0, ground_normal.z).normalized()
-		if downhill_dir.length() > 0.01:
+		if downhill_dir.length() > 0.01 and anti_slide_factor > 0.01:
 			# Apply force uphill to counter gravity's downhill component
-			var anti_slide_force: float = mass * 9.8 * slope_factor * 0.8
+			var anti_slide_force: float = mass * 9.8 * slope_factor * 0.8 * anti_slide_factor
 			apply_central_force(-downhill_dir * anti_slide_force)
 
 	# === CLIMB ASSIST (front wheel on steep, rear on flat) ===
@@ -375,14 +515,52 @@ func _physics_process(delta: float) -> void:
 			var climb_assist: float = (front_slope - rear_slope) * engine_force * 0.3
 			apply_central_force(Vector3.UP * climb_assist)
 
-	# === SPEED CONTROL (arcade direct clamp) ===
-	# Hard cap on speed - instant, responsive
-	if speed > max_speed:
-		linear_velocity = linear_velocity.normalized() * max_speed
+	# === SPEED CONTROL (slope-aware) ===
+	# On flat/uphill: cap at max_speed (engine limit)
+	# On downhill: allow gravity to push beyond max_speed up to a soft cap
+	var effective_max_speed: float = max_speed
+	
+	# Calculate if we're going downhill (gravity is helping)
+	# Downhill = velocity direction has a negative Y component when projected onto ground plane
+	var downhill_factor: float = 0.0
+	if is_grounded and speed > 0.5:
+		# Get ground normal
+		var ground_normal: Vector3 = Vector3.UP
+		if _rear_grounded:
+			ground_normal = _rear_normal
+		elif _front_grounded:
+			ground_normal = _front_normal
+		
+		# Check if velocity is going "downhill" relative to the slope
+		# Project velocity onto ground plane and see if it points down the slope
+		var slope_dir: Vector3 = Vector3(ground_normal.x, 0, ground_normal.z)
+		if slope_dir.length() > 0.01:
+			slope_dir = slope_dir.normalized()
+			var vel_horizontal: Vector3 = Vector3(linear_velocity.x, 0, linear_velocity.z).normalized()
+			# Positive dot = moving down the slope (in direction gravity pulls)
+			var slope_alignment: float = vel_horizontal.dot(slope_dir)
+			# Also factor in how steep the slope is (steeper = more gravity assist)
+			var slope_steepness: float = 1.0 - ground_normal.y  # 0 = flat, 1 = vertical
+			downhill_factor = maxf(0.0, slope_alignment) * slope_steepness
+	
+	# Increase max speed when going downhill (gravity assist)
+	effective_max_speed = max_speed + (max_speed * (downhill_speed_bonus - 1.0) * downhill_factor)
+	
+	# Soft speed limiting: only apply engine cap when throttling on flat/uphill
+	# When going downhill without throttle, let gravity do its thing with higher cap
+	if throttle > 0 and downhill_factor < 0.1:
+		# Throttling on flat/uphill: hard cap at engine max_speed
+		if speed > max_speed:
+			linear_velocity = linear_velocity.normalized() * max_speed
+	elif speed > effective_max_speed:
+		# Downhill or coasting: soft cap at effective max (allows gravity boost)
+		linear_velocity = linear_velocity.normalized() * effective_max_speed
 
 	# === JUMP ===
+	# Jump pushes away from bike's bottom (local UP), so angling bike up = more vertical jump
 	if Input.is_action_just_pressed("jump") and is_grounded:
-		apply_central_impulse(Vector3.UP * jump_impulse)
+		var jump_direction: Vector3 = global_transform.basis.y  # Bike's local up vector
+		apply_central_impulse(jump_direction * jump_impulse)
 
 	# === RESET (R key) ===
 	if Input.is_physical_key_pressed(KEY_R):
@@ -393,12 +571,17 @@ func _physics_process(delta: float) -> void:
 
 	# === LANDING IMPACT FEEL ===
 	if is_grounded and _was_airborne:
-		# Just landed - trigger squash!
+		# Just landed - trigger squash and grace period!
 		_landing_squash = landing_squash_amount
+		_landing_grace_timer = 0.3  # 300ms of reduced alignment for smooth landing
 	_was_airborne = not is_grounded
 
 	# Recover from squash quickly
 	_landing_squash = lerp(_landing_squash, 0.0, 10.0 * delta)
+	
+	# Tick down landing grace timer
+	if _landing_grace_timer > 0:
+		_landing_grace_timer -= delta
 
 	# === CAMERA ===
 	_update_camera(delta)
@@ -422,6 +605,68 @@ func _check_ground() -> void:
 	if _rear_grounded:
 		_rear_contact_point = _rear_wheel_ray.get_collision_point()
 		_rear_normal = _rear_wheel_ray.get_collision_normal()
+
+
+func _apply_suspension(delta: float) -> void:
+	# Store previous compression for velocity calculation
+	_prev_front_compression = _front_suspension_compression
+	_prev_rear_compression = _rear_suspension_compression
+	
+	# Front wheel suspension
+	if _front_grounded:
+		var ray_origin: Vector3 = _front_wheel_ray.global_position
+		var ray_hit: Vector3 = _front_contact_point
+		var current_length: float = ray_origin.distance_to(ray_hit)
+		
+		# Calculate compression (positive = compressed, negative = extended)
+		_front_suspension_compression = suspension_rest_length - current_length
+		_front_suspension_compression = clamp(_front_suspension_compression, -max_suspension_travel, max_suspension_travel)
+		
+		# Calculate compression velocity for damping
+		var compression_velocity: float = (_front_suspension_compression - _prev_front_compression) / delta
+		
+		# Spring force: F = stiffness * compression - damping * velocity
+		var spring_force: float = suspension_stiffness * _front_suspension_compression
+		var damping_force: float = suspension_damping * compression_velocity
+		var total_force: float = spring_force - damping_force
+		
+		# Apply force at wheel contact point, along the ground normal
+		if total_force > 0:
+			var force_vec: Vector3 = _front_normal * total_force
+			var force_pos: Vector3 = _front_contact_point - global_position
+			apply_force(force_vec, force_pos)
+		
+		# Visual offset for wheel (moves down when compressed)
+		_front_wheel_visual_offset = -_front_suspension_compression
+	else:
+		# No ground contact - extend suspension to rest
+		_front_suspension_compression = lerp(_front_suspension_compression, 0.0, 5.0 * delta)
+		_front_wheel_visual_offset = lerp(_front_wheel_visual_offset, 0.0, 5.0 * delta)
+	
+	# Rear wheel suspension
+	if _rear_grounded:
+		var ray_origin: Vector3 = _rear_wheel_ray.global_position
+		var ray_hit: Vector3 = _rear_contact_point
+		var current_length: float = ray_origin.distance_to(ray_hit)
+		
+		_rear_suspension_compression = suspension_rest_length - current_length
+		_rear_suspension_compression = clamp(_rear_suspension_compression, -max_suspension_travel, max_suspension_travel)
+		
+		var compression_velocity: float = (_rear_suspension_compression - _prev_rear_compression) / delta
+		
+		var spring_force: float = suspension_stiffness * _rear_suspension_compression
+		var damping_force: float = suspension_damping * compression_velocity
+		var total_force: float = spring_force - damping_force
+		
+		if total_force > 0:
+			var force_vec: Vector3 = _rear_normal * total_force
+			var force_pos: Vector3 = _rear_contact_point - global_position
+			apply_force(force_vec, force_pos)
+		
+		_rear_wheel_visual_offset = -_rear_suspension_compression
+	else:
+		_rear_suspension_compression = lerp(_rear_suspension_compression, 0.0, 5.0 * delta)
+		_rear_wheel_visual_offset = lerp(_rear_wheel_visual_offset, 0.0, 5.0 * delta)
 
 
 func _update_camera(delta: float) -> void:
@@ -545,8 +790,11 @@ func _animate_bike(delta: float) -> void:
 
 	if _front_wheel:
 		_front_wheel.rotation.x = _wheel_rotation
+		# Apply suspension visual offset (wheel moves up/down relative to fork)
+		_front_wheel.position.y = 0.35 + _front_wheel_visual_offset
 	if _rear_wheel:
 		_rear_wheel.rotation.x = _wheel_rotation
+		_rear_wheel.position.y = 0.35 + _rear_wheel_visual_offset
 
 	# Handlebar steering visual
 	var steer_input: float = Input.get_axis("steer_right", "steer_left")
@@ -587,39 +835,50 @@ func is_rear_grounded() -> bool:
 
 
 func reset_position(pos: Vector3) -> void:
-	global_position = pos
-	global_rotation = Vector3.ZERO
+	# Zero ALL physics state
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
+	
+	# Set position and rotation
+	global_position = pos
+	global_rotation = Vector3.ZERO
+	global_transform.basis = Basis.IDENTITY
+	
+	# Reset internal state
 	_wheel_rotation = 0.0
 	_steering_angle = 0.0
 	_visual_lean = 0.0
 	_rear_lean = 0.0
 	_landing_squash = 0.0
 	_was_airborne = false
+	
+	# Reset suspension
+	_front_suspension_compression = 0.0
+	_rear_suspension_compression = 0.0
+	_front_wheel_visual_offset = 0.0
+	_rear_wheel_visual_offset = 0.0
+	_prev_front_compression = 0.0
+	_prev_rear_compression = 0.0
+	
+	# Reset visuals
 	if _bike_model:
-		_bike_model.rotation.z = 0.0
-	if _front_assembly:
-		_front_assembly.rotation.z = 0.0
+		_bike_model.rotation = Vector3.ZERO
 		_bike_model.scale = Vector3.ONE
+	if _front_assembly:
+		_front_assembly.rotation = Vector3.ZERO
+	if _front_wheel:
+		_front_wheel.rotation = Vector3.ZERO
+		_front_wheel.position.y = 0.35
+	if _rear_wheel:
+		_rear_wheel.rotation = Vector3.ZERO
+		_rear_wheel.position.y = 0.35
 
 
 func reset_in_place() -> void:
-	# Keep X and Z position, lift slightly off ground, reset rotation and velocities
-	global_position = Vector3(global_position.x, global_position.y + 1.0, global_position.z)
-	global_rotation = Vector3.ZERO
-	linear_velocity = Vector3.ZERO
-	angular_velocity = Vector3.ZERO
-	_wheel_rotation = 0.0
-	_steering_angle = 0.0
-	_visual_lean = 0.0
-	_rear_lean = 0.0
-	_landing_squash = 0.0
-	_was_airborne = false
+	# Keep X and Z position, lift slightly off ground
+	var new_pos: Vector3 = Vector3(global_position.x, global_position.y + 1.0, global_position.z)
+	reset_position(new_pos)
 	# Reset camera to face bike's forward direction
-	_camera_yaw = global_rotation.y
-	if _bike_model:
-		_bike_model.rotation.z = 0.0
-		_bike_model.scale = Vector3.ONE
-	if _front_assembly:
-		_front_assembly.rotation.z = 0.0
+	_camera_yaw = 0.0
+	if _camera_pivot:
+		_camera_pivot.rotation.y = _camera_yaw
