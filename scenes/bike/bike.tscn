@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://buxj72q75k38i"]
+[gd_scene load_steps=24 format=3 uid="uid://buxj72q75k38i"]
 
 [ext_resource type="Script" uid="uid://48tv28sjad6l" path="res://scripts/bike/bike_controller.gd" id="1_bike_ctrl"]
 
@@ -10,6 +10,9 @@ size = Vector3(0.3, 0.4, 0.8)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_wheel"]
 radius = 0.38
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_probe"]
+radius = 0.32
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_frame_thick"]
 top_radius = 0.045
@@ -301,13 +304,17 @@ transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, -0.09, 0)
 mesh = SubResource("BoxMesh_pedal")
 surface_material_override/0 = SubResource("StandardMaterial3D_dark")
 
-[node name="FrontWheelRay" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.65)
-target_position = Vector3(0, -0.8, 0)
+[node name="FrontWheelProbe" type="ShapeCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.38, 0.65)
+shape = SubResource("SphereShape3D_probe")
+target_position = Vector3(0, -0.95, 0)
+max_results = 1
 
-[node name="RearWheelRay" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.6)
-target_position = Vector3(0, -0.8, 0)
+[node name="RearWheelProbe" type="ShapeCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.38, -0.6)
+shape = SubResource("SphereShape3D_probe")
+target_position = Vector3(0, -0.95, 0)
+max_results = 1
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

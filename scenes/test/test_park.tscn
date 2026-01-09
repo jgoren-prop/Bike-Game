@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://ctestpark001"]
+[gd_scene load_steps=44 format=3 uid="uid://ctestpark001"]
 
 [ext_resource type="Script" uid="uid://bcoo1uy45xbuf" path="res://scripts/test/test_park.gd" id="1_park"]
 [ext_resource type="Script" uid="uid://do6bx1vi82o46" path="res://scripts/systems/moving_platform.gd" id="2_moving"]
@@ -41,6 +41,15 @@ roughness = 0.5
 emission_enabled = true
 emission = Color(0.4, 0.35, 0.05, 1)
 
+[sub_resource type="BoxMesh" id="BoxMesh_lane_marker"]
+size = Vector3(8, 0.02, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_lane_cyan"]
+albedo_color = Color(0.2, 0.9, 0.95, 1)
+roughness = 0.3
+emission_enabled = true
+emission = Color(0.1, 0.5, 0.55, 1)
+
 [sub_resource type="BoxMesh" id="BoxMesh_rail"]
 size = Vector3(0.4, 0.2, 15)
 
@@ -52,21 +61,9 @@ roughness = 0.2
 [sub_resource type="BoxShape3D" id="BoxShape3D_rail"]
 size = Vector3(0.4, 0.2, 15)
 
-[sub_resource type="BoxMesh" id="BoxMesh_halfpipe"]
-size = Vector3(5, 0.3, 30)
-
 [sub_resource type="StandardMaterial3D" id="Mat_halfpipe"]
 albedo_color = Color(0.3, 0.5, 0.6, 1)
 roughness = 0.6
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_halfpipe"]
-size = Vector3(5, 0.3, 30)
-
-[sub_resource type="BoxMesh" id="BoxMesh_halfpipe_floor"]
-size = Vector3(20, 0.3, 30)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_halfpipe_floor"]
-size = Vector3(20, 0.3, 30)
 
 [sub_resource type="BoxMesh" id="BoxMesh_platform"]
 size = Vector3(8, 0.5, 8)
@@ -251,6 +248,21 @@ surface_material_override/0 = SubResource("Mat_ramp")
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp30deg"]
 shape = SubResource("BoxShape3D_ramp_med")
 
+[node name="Lane1" type="MeshInstance3D" parent="RampArea/Ramp30deg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, -3)
+mesh = SubResource("BoxMesh_lane_marker")
+surface_material_override/0 = SubResource("Mat_lane_cyan")
+
+[node name="Lane2" type="MeshInstance3D" parent="RampArea/Ramp30deg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, 0)
+mesh = SubResource("BoxMesh_lane_marker")
+surface_material_override/0 = SubResource("Mat_lane_cyan")
+
+[node name="Lane3" type="MeshInstance3D" parent="RampArea/Ramp30deg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, 3)
+mesh = SubResource("BoxMesh_lane_marker")
+surface_material_override/0 = SubResource("Mat_lane_cyan")
+
 [node name="Ramp45deg" type="StaticBody3D" parent="RampArea"]
 transform = Transform3D(1, 0, 0, 0, 0.707, 0.707, 0, -0.707, 0.707, 15, 1.2, 0)
 
@@ -260,6 +272,21 @@ surface_material_override/0 = SubResource("Mat_yellow")
 
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp45deg"]
 shape = SubResource("BoxShape3D_ramp_med")
+
+[node name="Lane1" type="MeshInstance3D" parent="RampArea/Ramp45deg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, -3)
+mesh = SubResource("BoxMesh_lane_marker")
+surface_material_override/0 = SubResource("Mat_lane_cyan")
+
+[node name="Lane2" type="MeshInstance3D" parent="RampArea/Ramp45deg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, 0)
+mesh = SubResource("BoxMesh_lane_marker")
+surface_material_override/0 = SubResource("Mat_lane_cyan")
+
+[node name="Lane3" type="MeshInstance3D" parent="RampArea/Ramp45deg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, 3)
+mesh = SubResource("BoxMesh_lane_marker")
+surface_material_override/0 = SubResource("Mat_lane_cyan")
 
 [node name="Ramp60deg" type="StaticBody3D" parent="RampArea"]
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.866, 0, -0.866, 0.5, -15, 1.8, 20)
@@ -378,109 +405,31 @@ surface_material_override/0 = SubResource("Mat_ramp")
 shape = SubResource("BoxShape3D_rail")
 
 [node name="HalfPipeArea" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.15447712, -40)
 
 [node name="AreaSpawn" type="Marker3D" parent="HalfPipeArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 
-[node name="HalfPipeLeft1" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, -12, 0.3, 0)
+[node name="Label" type="Label3D" parent="HalfPipeArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0)
+text = "SMOOTH HALF PIPE"
+font_size = 48
 
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/HalfPipeLeft1"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
+[node name="HalfPipeShape" type="CSGCombiner3D" parent="HalfPipeArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.899685, 0)
+use_collision = true
 
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/HalfPipeLeft1"]
-shape = SubResource("BoxShape3D_halfpipe")
+[node name="Base" type="CSGBox3D" parent="HalfPipeArea/HalfPipeShape"]
+size = Vector3(24, 6, 30)
+material = SubResource("Mat_halfpipe")
 
-[node name="HalfPipeLeft2" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(1, 0, 0, 0, 0.707, 0.707, 0, -0.707, 0.707, -15, 1.5, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/HalfPipeLeft2"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/HalfPipeLeft2"]
-shape = SubResource("BoxShape3D_halfpipe")
-
-[node name="HalfPipeLeft3" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(1, 0, 0, 0, 0.5, 0.866, 0, -0.866, 0.5, -17, 3.5, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/HalfPipeLeft3"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/HalfPipeLeft3"]
-shape = SubResource("BoxShape3D_halfpipe")
-
-[node name="HalfPipeRight1" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(1, 0, 0, 0, 0.866, -0.5, 0, 0.5, 0.866, 12, 0.3, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/HalfPipeRight1"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/HalfPipeRight1"]
-shape = SubResource("BoxShape3D_halfpipe")
-
-[node name="HalfPipeRight2" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(1, 0, 0, 0, 0.707, -0.707, 0, 0.707, 0.707, 15, 1.5, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/HalfPipeRight2"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/HalfPipeRight2"]
-shape = SubResource("BoxShape3D_halfpipe")
-
-[node name="HalfPipeRight3" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(1, 0, 0, 0, 0.5, -0.866, 0, 0.866, 0.5, 17, 3.5, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/HalfPipeRight3"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/HalfPipeRight3"]
-shape = SubResource("BoxShape3D_halfpipe")
-
-[node name="HalfPipeFloor" type="StaticBody3D" parent="HalfPipeArea"]
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/HalfPipeFloor"]
-mesh = SubResource("BoxMesh_halfpipe_floor")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/HalfPipeFloor"]
-shape = SubResource("BoxShape3D_halfpipe_floor")
-
-[node name="QuarterPipe1" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(0, 0, 1, 0.866, 0.5, 0, -0.5, 0.866, 0, 0, 0.3, -20)
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/QuarterPipe1"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/QuarterPipe1"]
-shape = SubResource("BoxShape3D_halfpipe")
-
-[node name="QuarterPipe2" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(0, 0, 1, 0.707, 0.707, 0, -0.707, 0.707, 0, 0, 1.5, -23)
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/QuarterPipe2"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/QuarterPipe2"]
-shape = SubResource("BoxShape3D_halfpipe")
-
-[node name="QuarterPipe3" type="StaticBody3D" parent="HalfPipeArea"]
-transform = Transform3D(0, 0, 1, 0.5, 0.866, 0, -0.866, 0.5, 0, 0, 3.5, -25)
-
-[node name="Mesh" type="MeshInstance3D" parent="HalfPipeArea/QuarterPipe3"]
-mesh = SubResource("BoxMesh_halfpipe")
-surface_material_override/0 = SubResource("Mat_halfpipe")
-
-[node name="Collision" type="CollisionShape3D" parent="HalfPipeArea/QuarterPipe3"]
-shape = SubResource("BoxShape3D_halfpipe")
+[node name="PipeCutter" type="CSGCylinder3D" parent="HalfPipeArea/HalfPipeShape"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 6.8047466, 0)
+operation = 2
+radius = 10.0
+height = 32.0
+sides = 32
+material = SubResource("Mat_halfpipe")
 
 [node name="ObstacleArea" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -40)
@@ -864,7 +813,7 @@ surface_material_override/0 = SubResource("Mat_bump")
 shape = SubResource("BoxShape3D_bump_tiny")
 
 [node name="SkateparkBowl" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2773294, 60)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1062613, 60)
 
 [node name="Label" type="Label3D" parent="SkateparkBowl"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -18)

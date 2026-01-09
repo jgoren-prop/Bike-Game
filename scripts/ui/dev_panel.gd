@@ -20,13 +20,17 @@ var _bike: BikeController = null
 @onready var _steer_torque_slider: HSlider = $Panel/ScrollContainer/VBox/SteeringSection/TurnSpeedSlider
 @onready var _lean_torque_slider: HSlider = $Panel/ScrollContainer/VBox/SteeringSection/TurnInertiaSlider
 
-# Arcade handling sliders
-@onready var _vel_align_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/VelAlignSlider
-@onready var _drift_grip_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftGripSlider
-@onready var _drift_kickout_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftKickoutSlider
-@onready var _drift_steer_boost_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftSteerBoostSlider
-@onready var _pitch_stab_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/PitchStabSlider
+# NEW TRACTION MODEL sliders (Phase 10)
+@onready var _traction_accel_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/TractionAccelSlider
+@onready var _lateral_grip_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/LateralGripSlider
+@onready var _drift_lateral_grip_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftLateralGripSlider
+@onready var _anti_slide_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/AntiSlideSlider
 @onready var _wall_grip_speed_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/WallGripSpeedSlider
+
+# STABILIZATION sliders
+@onready var _upright_torque_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/UprightTorqueSlider
+@onready var _lean_angle_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/LeanAngleSlider
+@onready var _stab_damp_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/StabDampSlider
 
 # Jump slider
 @onready var _jump_slider: HSlider = $Panel/ScrollContainer/VBox/FrictionSection/JumpSlider
@@ -51,10 +55,9 @@ var _bike: BikeController = null
 @onready var _susp_rest_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/SuspRestSlider
 @onready var _susp_travel_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/SuspTravelSlider
 
-# Tire grip sliders
-@onready var _tire_grip_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/TireGripSlider
-@onready var _climb_force_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/ClimbForceSlider
-@onready var _bump_pop_slider: HSlider = $Panel/ScrollContainer/VBox/SuspensionSection/BumpPopSlider
+# Legacy toggle checkboxes
+@onready var _legacy_bump_checkbox: CheckBox = $Panel/ScrollContainer/VBox/SuspensionSection/LegacyBumpCheckbox
+@onready var _legacy_climb_checkbox: CheckBox = $Panel/ScrollContainer/VBox/SuspensionSection/LegacyClimbCheckbox
 
 # Value labels
 @onready var _max_speed_value: Label = $Panel/ScrollContainer/VBox/MovementSection/MaxSpeedValue
@@ -65,13 +68,17 @@ var _bike: BikeController = null
 @onready var _steer_torque_value: Label = $Panel/ScrollContainer/VBox/SteeringSection/TurnSpeedValue
 @onready var _lean_torque_value: Label = $Panel/ScrollContainer/VBox/SteeringSection/TurnInertiaValue
 
-# Arcade handling value labels
-@onready var _vel_align_value: Label = $Panel/ScrollContainer/VBox/GripSection/VelAlignValue
-@onready var _drift_grip_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftGripValue
-@onready var _drift_kickout_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftKickoutValue
-@onready var _drift_steer_boost_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftSteerBoostValue
-@onready var _pitch_stab_value: Label = $Panel/ScrollContainer/VBox/GripSection/PitchStabValue
+# NEW TRACTION MODEL value labels (Phase 10)
+@onready var _traction_accel_value: Label = $Panel/ScrollContainer/VBox/GripSection/TractionAccelValue
+@onready var _lateral_grip_value: Label = $Panel/ScrollContainer/VBox/GripSection/LateralGripValue
+@onready var _drift_lateral_grip_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftLateralGripValue
+@onready var _anti_slide_value: Label = $Panel/ScrollContainer/VBox/GripSection/AntiSlideValue
 @onready var _wall_grip_speed_value: Label = $Panel/ScrollContainer/VBox/GripSection/WallGripSpeedValue
+
+# STABILIZATION value labels
+@onready var _upright_torque_value: Label = $Panel/ScrollContainer/VBox/StabSection/UprightTorqueValue
+@onready var _lean_angle_value: Label = $Panel/ScrollContainer/VBox/StabSection/LeanAngleValue
+@onready var _stab_damp_value: Label = $Panel/ScrollContainer/VBox/StabSection/StabDampValue
 
 @onready var _jump_value: Label = $Panel/ScrollContainer/VBox/FrictionSection/JumpValue
 
@@ -94,10 +101,7 @@ var _bike: BikeController = null
 @onready var _susp_rest_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/SuspRestValue
 @onready var _susp_travel_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/SuspTravelValue
 
-# Tire grip value labels
-@onready var _tire_grip_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/TireGripValue
-@onready var _climb_force_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/ClimbForceValue
-@onready var _bump_pop_value: Label = $Panel/ScrollContainer/VBox/SuspensionSection/BumpPopValue
+# (removed tire_grip, climb_force, bump_pop - now behind legacy toggles)
 
 
 @onready var _copy_button: Button = $Panel/ScrollContainer/VBox/CopyButton
@@ -170,19 +174,24 @@ func _connect_sliders() -> void:
 		_steer_torque_slider.value_changed.connect(_on_steer_torque_changed)
 	if _lean_torque_slider:
 		_lean_torque_slider.value_changed.connect(_on_lean_torque_changed)
-	# Arcade handling sliders
-	if _vel_align_slider:
-		_vel_align_slider.value_changed.connect(_on_vel_align_changed)
-	if _drift_grip_slider:
-		_drift_grip_slider.value_changed.connect(_on_drift_grip_changed)
-	if _drift_kickout_slider:
-		_drift_kickout_slider.value_changed.connect(_on_drift_kickout_changed)
-	if _drift_steer_boost_slider:
-		_drift_steer_boost_slider.value_changed.connect(_on_drift_steer_boost_changed)
-	if _pitch_stab_slider:
-		_pitch_stab_slider.value_changed.connect(_on_pitch_stab_changed)
+	# NEW TRACTION MODEL sliders (Phase 10)
+	if _traction_accel_slider:
+		_traction_accel_slider.value_changed.connect(_on_traction_accel_changed)
+	if _lateral_grip_slider:
+		_lateral_grip_slider.value_changed.connect(_on_lateral_grip_changed)
+	if _drift_lateral_grip_slider:
+		_drift_lateral_grip_slider.value_changed.connect(_on_drift_lateral_grip_changed)
+	if _anti_slide_slider:
+		_anti_slide_slider.value_changed.connect(_on_anti_slide_changed)
 	if _wall_grip_speed_slider:
 		_wall_grip_speed_slider.value_changed.connect(_on_wall_grip_speed_changed)
+	# STABILIZATION sliders
+	if _upright_torque_slider:
+		_upright_torque_slider.value_changed.connect(_on_upright_torque_changed)
+	if _lean_angle_slider:
+		_lean_angle_slider.value_changed.connect(_on_lean_angle_changed)
+	if _stab_damp_slider:
+		_stab_damp_slider.value_changed.connect(_on_stab_damp_changed)
 	if _jump_slider:
 		_jump_slider.value_changed.connect(_on_jump_changed)
 	# Arcade sliders
@@ -216,13 +225,11 @@ func _connect_sliders() -> void:
 		_susp_rest_slider.value_changed.connect(_on_susp_rest_changed)
 	if _susp_travel_slider:
 		_susp_travel_slider.value_changed.connect(_on_susp_travel_changed)
-	# Tire grip sliders
-	if _tire_grip_slider:
-		_tire_grip_slider.value_changed.connect(_on_tire_grip_changed)
-	if _climb_force_slider:
-		_climb_force_slider.value_changed.connect(_on_climb_force_changed)
-	if _bump_pop_slider:
-		_bump_pop_slider.value_changed.connect(_on_bump_pop_changed)
+	# Legacy toggle connections
+	if _legacy_bump_checkbox:
+		_legacy_bump_checkbox.toggled.connect(_on_legacy_bump_toggled)
+	if _legacy_climb_checkbox:
+		_legacy_climb_checkbox.toggled.connect(_on_legacy_climb_toggled)
 
 
 func _sync_sliders_from_bike() -> void:
@@ -250,25 +257,32 @@ func _sync_sliders_from_bike() -> void:
 	if _lean_torque_slider:
 		_lean_torque_slider.value = _bike.lean_torque
 		_update_value_label(_lean_torque_value, _bike.lean_torque)
-	# Arcade handling sliders
-	if _vel_align_slider:
-		_vel_align_slider.value = _bike.velocity_alignment
-		_update_value_label(_vel_align_value, _bike.velocity_alignment)
-	if _drift_grip_slider:
-		_drift_grip_slider.value = _bike.drift_grip
-		_update_value_label(_drift_grip_value, _bike.drift_grip)
-	if _drift_kickout_slider:
-		_drift_kickout_slider.value = _bike.drift_kickout
-		_update_value_label(_drift_kickout_value, _bike.drift_kickout)
-	if _drift_steer_boost_slider:
-		_drift_steer_boost_slider.value = _bike.drift_steer_boost
-		_update_value_label(_drift_steer_boost_value, _bike.drift_steer_boost)
-	if _pitch_stab_slider:
-		_pitch_stab_slider.value = _bike.pitch_stabilization
-		_update_value_label(_pitch_stab_value, _bike.pitch_stabilization)
+	# NEW TRACTION MODEL sliders (Phase 10)
+	if _traction_accel_slider:
+		_traction_accel_slider.value = _bike.traction_accel_time
+		_update_value_label(_traction_accel_value, _bike.traction_accel_time, "s")
+	if _lateral_grip_slider:
+		_lateral_grip_slider.value = _bike.lateral_grip_strength
+		_update_value_label(_lateral_grip_value, _bike.lateral_grip_strength)
+	if _drift_lateral_grip_slider:
+		_drift_lateral_grip_slider.value = _bike.drift_lateral_grip
+		_update_value_label(_drift_lateral_grip_value, _bike.drift_lateral_grip)
+	if _anti_slide_slider:
+		_anti_slide_slider.value = _bike.anti_slide_strength
+		_update_value_label(_anti_slide_value, _bike.anti_slide_strength)
 	if _wall_grip_speed_slider:
 		_wall_grip_speed_slider.value = _bike.wall_grip_speed_threshold
 		_update_value_label(_wall_grip_speed_value, _bike.wall_grip_speed_threshold, " m/s")
+	# STABILIZATION sliders
+	if _upright_torque_slider:
+		_upright_torque_slider.value = _bike.normal_upright_strength
+		_update_value_label(_upright_torque_value, _bike.normal_upright_strength)
+	if _lean_angle_slider:
+		_lean_angle_slider.value = _bike.lean_into_turn_angle
+		_update_value_label(_lean_angle_value, _bike.lean_into_turn_angle, " rad")
+	if _stab_damp_slider:
+		_stab_damp_slider.value = _bike.pitch_stabilization
+		_update_value_label(_stab_damp_value, _bike.pitch_stabilization)
 	if _jump_slider:
 		_jump_slider.value = _bike.jump_impulse
 		_update_value_label(_jump_value, _bike.jump_impulse)
@@ -316,16 +330,11 @@ func _sync_sliders_from_bike() -> void:
 	if _susp_travel_slider:
 		_susp_travel_slider.value = _bike.max_suspension_travel
 		_update_value_label(_susp_travel_value, _bike.max_suspension_travel)
-	# Tire grip sliders
-	if _tire_grip_slider:
-		_tire_grip_slider.value = _bike.tire_grip
-		_update_value_label(_tire_grip_value, _bike.tire_grip)
-	if _climb_force_slider:
-		_climb_force_slider.value = _bike.front_climb_force
-		_update_value_label(_climb_force_value, _bike.front_climb_force)
-	if _bump_pop_slider:
-		_bump_pop_slider.value = _bike.bump_pop_strength
-		_update_value_label(_bump_pop_value, _bike.bump_pop_strength)
+	# Legacy toggles
+	if _legacy_bump_checkbox:
+		_legacy_bump_checkbox.button_pressed = _bike.enable_legacy_bump_assist
+	if _legacy_climb_checkbox:
+		_legacy_climb_checkbox.button_pressed = _bike.enable_legacy_climb_assist
 
 
 func _update_value_label(label: Label, value: float, suffix: String = "") -> void:
@@ -377,42 +386,56 @@ func _on_lean_torque_changed(value: float) -> void:
 		_update_value_label(_lean_torque_value, value)
 
 
-# === ARCADE HANDLING CALLBACKS ===
+# === NEW TRACTION MODEL CALLBACKS (Phase 10) ===
 
-func _on_vel_align_changed(value: float) -> void:
+func _on_traction_accel_changed(value: float) -> void:
 	if _bike:
-		_bike.velocity_alignment = value
-		_update_value_label(_vel_align_value, value)
+		_bike.traction_accel_time = value
+		_update_value_label(_traction_accel_value, value, "s")
 
 
-func _on_drift_grip_changed(value: float) -> void:
+func _on_lateral_grip_changed(value: float) -> void:
 	if _bike:
-		_bike.drift_grip = value
-		_update_value_label(_drift_grip_value, value)
+		_bike.lateral_grip_strength = value
+		_update_value_label(_lateral_grip_value, value)
 
 
-func _on_drift_kickout_changed(value: float) -> void:
+func _on_drift_lateral_grip_changed(value: float) -> void:
 	if _bike:
-		_bike.drift_kickout = value
-		_update_value_label(_drift_kickout_value, value)
+		_bike.drift_lateral_grip = value
+		_update_value_label(_drift_lateral_grip_value, value)
 
 
-func _on_drift_steer_boost_changed(value: float) -> void:
+func _on_anti_slide_changed(value: float) -> void:
 	if _bike:
-		_bike.drift_steer_boost = value
-		_update_value_label(_drift_steer_boost_value, value)
-
-
-func _on_pitch_stab_changed(value: float) -> void:
-	if _bike:
-		_bike.pitch_stabilization = value
-		_update_value_label(_pitch_stab_value, value)
+		_bike.anti_slide_strength = value
+		_update_value_label(_anti_slide_value, value)
 
 
 func _on_wall_grip_speed_changed(value: float) -> void:
 	if _bike:
 		_bike.wall_grip_speed_threshold = value
 		_update_value_label(_wall_grip_speed_value, value, " m/s")
+
+
+# === STABILIZATION CALLBACKS ===
+
+func _on_upright_torque_changed(value: float) -> void:
+	if _bike:
+		_bike.normal_upright_strength = value
+		_update_value_label(_upright_torque_value, value)
+
+
+func _on_lean_angle_changed(value: float) -> void:
+	if _bike:
+		_bike.lean_into_turn_angle = value
+		_update_value_label(_lean_angle_value, value, " rad")
+
+
+func _on_stab_damp_changed(value: float) -> void:
+	if _bike:
+		_bike.pitch_stabilization = value
+		_update_value_label(_stab_damp_value, value)
 
 
 func _on_jump_changed(value: float) -> void:
@@ -514,22 +537,14 @@ func _on_susp_travel_changed(value: float) -> void:
 		_update_value_label(_susp_travel_value, value)
 
 
-func _on_tire_grip_changed(value: float) -> void:
+func _on_legacy_bump_toggled(toggled_on: bool) -> void:
 	if _bike:
-		_bike.tire_grip = value
-		_update_value_label(_tire_grip_value, value)
+		_bike.enable_legacy_bump_assist = toggled_on
 
 
-func _on_climb_force_changed(value: float) -> void:
+func _on_legacy_climb_toggled(toggled_on: bool) -> void:
 	if _bike:
-		_bike.front_climb_force = value
-		_update_value_label(_climb_force_value, value)
-
-
-func _on_bump_pop_changed(value: float) -> void:
-	if _bike:
-		_bike.bump_pop_strength = value
-		_update_value_label(_bump_pop_value, value)
+		_bike.enable_legacy_climb_assist = toggled_on
 
 
 func _on_copy_pressed() -> void:
@@ -547,13 +562,16 @@ func _on_copy_pressed() -> void:
 	text += "\nSTEERING:\n"
 	text += "  Steer Torque: %.1f\n" % _bike.steer_torque
 	text += "  Lean Torque: %.1f\n" % _bike.lean_torque
-	text += "\nARCADE HANDLING:\n"
-	text += "  Velocity Alignment: %.2f\n" % _bike.velocity_alignment
-	text += "  Drift Grip: %.1f\n" % _bike.drift_grip
-	text += "  Drift Kickout: %.1f\n" % _bike.drift_kickout
-	text += "  Drift Steer Boost: %.1f\n" % _bike.drift_steer_boost
-	text += "  Pitch Stability: %.1f\n" % _bike.pitch_stabilization
+	text += "\nTRACTION MODEL:\n"
+	text += "  Traction Accel Time: %.2fs\n" % _bike.traction_accel_time
+	text += "  Lateral Grip: %.1f\n" % _bike.lateral_grip_strength
+	text += "  Drift Lateral Grip: %.1f\n" % _bike.drift_lateral_grip
+	text += "  Anti-Slide Strength: %.2f\n" % _bike.anti_slide_strength
 	text += "  Wall Grip Speed: %.1f m/s\n" % _bike.wall_grip_speed_threshold
+	text += "\nSTABILIZATION:\n"
+	text += "  Upright Torque: %.1f\n" % _bike.normal_upright_strength
+	text += "  Lean Angle: %.2f rad\n" % _bike.lean_into_turn_angle
+	text += "  Stabilization Damp: %.1f\n" % _bike.pitch_stabilization
 	text += "\nJUMP:\n"
 	text += "  Jump Force: %.1f\n" % _bike.jump_impulse
 	text += "\nARCADE FEEL:\n"
@@ -572,8 +590,9 @@ func _on_copy_pressed() -> void:
 	text += "  Damping: %.1f\n" % _bike.suspension_damping
 	text += "  Rest Length: %.2f\n" % _bike.suspension_rest_length
 	text += "  Max Travel: %.2f\n" % _bike.max_suspension_travel
-	text += "  Tire Grip: %.2f\n" % _bike.tire_grip
-	text += "  Climb Force: %.1f\n" % _bike.front_climb_force
+	text += "\nLEGACY SYSTEMS:\n"
+	text += "  Bump Assist: %s\n" % ("ON" if _bike.enable_legacy_bump_assist else "OFF")
+	text += "  Climb Assist: %s\n" % ("ON" if _bike.enable_legacy_climb_assist else "OFF")
 
 	DisplayServer.clipboard_set(text)
 	_copy_button.text = "Copied!"
