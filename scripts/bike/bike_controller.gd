@@ -9,14 +9,14 @@ enum StabilityMode { AIR, NORMAL_GROUNDED, STEEP_SIDEWAYS, CRASH_WINDOW }
 
 # === PHYSICS PARAMETERS ===
 # Movement
-@export var engine_force: float = 2100.0     # Forward thrust (Newtons)
+@export var engine_force: float = 1000.0     # Forward thrust (Newtons)
 @export var brake_force: float = 1000.0      # Braking force (snappy stops)
 @export var max_speed: float = 21.0          # Engine-limited speed on flat ground (m/s)
 @export var downhill_speed_bonus: float = 1.5 # Multiplier for max speed when going downhill (gravity assist)
 
 # Momentum
 @export var bike_mass: float = 95.0          # Mass (kg)
-@export var bike_drag: float = 0.08          # Linear damping - lower for smoother landings
+@export var bike_drag: float = 0.10          # Linear damping - lower for smoother landings
 
 # Steering
 @export var steer_torque: float = 250.0      # Yaw torque for turning
@@ -24,24 +24,25 @@ enum StabilityMode { AIR, NORMAL_GROUNDED, STEEP_SIDEWAYS, CRASH_WINDOW }
 
 # Balance/Lean (W = throttle + tilt forward, S = brake/tilt back)
 @export var lean_torque: float = 400.0       # Pitch torque from input
-@export var pitch_stabilization: float = 120.0 # Pitch stability when grounded
+# NOTE: pitch_stabilization removed - now handled by ground-relative _apply_stabilization()
 
-# Arcade Handling - NEW TRACTION MODEL (replaces velocity_alignment)
-@export var traction_accel_time: float = 0.15      # Seconds to reach target speed
-@export var lateral_grip_strength: float = 12.0    # Lateral damping multiplier (normal mode)
+# Arcade Handling - SLOPE-AWARE TRACTION MODEL
+@export var traction_accel_time: float = 0.50      # Seconds to reach target speed when throttling
+@export var lateral_grip_strength: float = 28.0    # Lateral damping multiplier (normal mode)
 @export var drift_lateral_grip: float = 2.0        # Lower grip during drift
 @export var max_traction_force: float = 3000.0     # Safety clamp for seam transitions
 @export var drift_kickout: float = 0.0       # Lateral impulse when starting drift
 @export var drift_steer_boost: float = 1.3   # Steering multiplier during drift
 @export var max_lean_angle: float = 0.6      # ~35 degrees max lean (radians)
 
+# Slope-Aware Traction (true free-roll system)
+@export var idle_brake_time: float = 5.00          # Seconds to come to stop on FLAT ground only
+# NOTE: downhill_roll_factor and uphill_grip_strength REMOVED - true free-roll handles slopes naturally
+
 # Torque-Based Stabilization (see Per-Mode Stabilization Strengths for main params)
-@export var lean_into_turn_angle: float = 0.15       # Radians (~8.5 degrees) - how much bike leans into turns
+@export var lean_into_turn_angle: float = 0.06       # Radians (~3.4 degrees) - how much bike leans into turns
 @export var max_stabilization_torque: float = 800.0  # Hard clamp for safety
 @export var min_lean_speed: float = 2.0              # No lean below this speed
-
-# Anti-Slide (replaces direct lateral velocity deletion)
-@export var anti_slide_strength: float = 0.8  # 0-1, how much of gravity's downhill pull to counter
 
 # Ground Probing
 @export var normal_smoothing_base: int = 5   # Frames at low speed (~42ms at 120Hz)
@@ -69,8 +70,8 @@ enum StabilityMode { AIR, NORMAL_GROUNDED, STEEP_SIDEWAYS, CRASH_WINDOW }
 @export var camera_angle: float = 16.0        # Pitch angle (degrees) - how much camera looks down
 
 # Suspension Parameters
-@export var suspension_stiffness: float = 60.0    # Spring force (N/m) - softer for better landings
-@export var suspension_damping: float = 40.0      # Damper to prevent oscillation - lower for more bounce
+@export var suspension_stiffness: float = 1200.0  # Spring force (N/m) - tuned for visible travel with bounce
+@export var suspension_damping: float = 8.0       # Damper - lower for more bounce, paired with higher stiffness
 @export var suspension_rest_length: float = 0.55  # Neutral suspension position
 @export var max_suspension_travel: float = 0.35   # Max compression/extension - more travel for hard landings
 
@@ -79,24 +80,22 @@ enum StabilityMode { AIR, NORMAL_GROUNDED, STEEP_SIDEWAYS, CRASH_WINDOW }
 @export var front_climb_force: float = 1200.0     # Force to help front wheel climb bumps (needs to exceed bike weight)
 @export var bump_pop_strength: float = 0.3        # How strong the "pop" assist is when stuck on bumps (0-1)
 
-# Wall Grip Parameters (speed-dependent stability on angled walls)
-@export var wall_grip_speed_threshold: float = 9.0  # Speed (m/s) for full wall grip; below this, bike tips on steep sideways walls
 
 # Stability Mode Thresholds
 @export var steep_slope_threshold: float = 0.5       # ground_up.y below this = steep (~60 degrees)
 @export var across_slope_threshold: float = 0.7     # across_factor above this = sideways
-@export var sideways_speed_threshold: float = 4.0   # Speed below this + steep + sideways = can fall
+@export var wall_tip_speed: float = 6.0             # Speed below this + steep + sideways = bike can tip over (raised for forgiving gameplay)
 @export var crash_impact_threshold: float = 15.0    # Impulse magnitude to trigger crash window
 @export var crash_window_duration: float = 0.5      # Seconds of reduced stabilization after impact
 
 # Per-Mode Stabilization Strengths
-@export var normal_upright_strength: float = 500.0  # Strong for normal driving (never fall)
-@export var normal_roll_damping: float = 15.0       # High damping on flat ground
-@export var steep_upright_strength: float = 80.0    # Weak when sideways on steep slope
-@export var steep_roll_damping: float = 2.0         # Low damping allows falling
+@export var normal_upright_strength: float = 550.0  # Strong for normal driving (never fall)
+@export var normal_roll_damping: float = 210.0      # Moderate damping for smooth stabilization (direct Nm/(rad/s))
+@export var steep_upright_strength: float = 40.0    # Very weak when sideways on steep slope (allows tipping)
+@export var steep_roll_damping: float = 10.0        # Low damping allows natural falling (direct Nm/(rad/s))
 
 # COM Shifting (lowers center of mass when grounded for stability)
-@export var grounded_com_offset: float = -0.15      # Lower COM when grounded (negative = down)
+@export var grounded_com_offset: float = -0.05      # Less COM lowering = less artificial stability
 
 # === INTERNAL STATE ===
 var _front_grounded: bool = false
@@ -176,6 +175,12 @@ signal speed_changed(speed: float)
 var _bump_assist_active: bool = false  # Track if we're currently assisting a bump climb
 
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	## Physics-critical operations that must run during physics step.
+	## NOTE: Some forces (drive, brake, steering) remain in _physics_process because:
+	##   1. Drive force is applied at wheel contact points for realistic wheelie torque
+	##   2. Contact points come from _check_ground() which runs in _physics_process
+	##   3. This split is intentional for trials-style bike dynamics
+	
 	# Compute ground frame FIRST - all other physics uses this
 	_compute_ground_frame(state)
 	
@@ -199,10 +204,6 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 	# === ROLL DAMPING ===
 	# Prevents roll velocity accumulation from small bumps
 	_apply_roll_damping(state)
-	
-	# === ANTI-SLIDE (Phase 6) ===
-	# Counters gravity's downhill pull without deleting player-intended lateral motion
-	_apply_anti_slide(state)
 	
 	# === LEGACY BUMP ASSIST (behind toggle) ===
 	_bump_assist_active = false
@@ -509,11 +510,9 @@ func _physics_process(delta: float) -> void:
 	var rear_follow_speed: float = 6.0 * delta  # Slower follow for natural feel
 	_rear_lean = lerp(_rear_lean, _visual_lean, rear_follow_speed)
 
-	# Gentle pitch stabilization when grounded (helps balance)
-	# Disabled when leaning (tilt), doing wheelie (lean_back), bump assist, or just landed
-	if wheels_touching and abs(tilt) < 0.1 and lean_back < 0.1 and not _bump_assist_active and _landing_grace_timer <= 0:
-		var current_pitch: float = global_rotation.x
-		apply_torque(right * -current_pitch * pitch_stabilization)
+	# NOTE: Legacy pitch_stabilization REMOVED - was using world-relative global_rotation.x
+	# which conflicted with the ground-relative _apply_stabilization() system.
+	# All stabilization is now handled by _apply_stabilization() in _integrate_forces().
 
 	# === UPRIGHT STABILIZATION ===
 	# MOVED TO _integrate_forces() -> _apply_stabilization()
@@ -833,7 +832,7 @@ func _update_stability_mode(state: PhysicsDirectBodyState3D) -> void:
 	var is_across: bool = _across_slope_factor > across_slope_threshold
 	
 	var relative_speed: float = _relative_velocity.length()
-	var is_slow: bool = relative_speed < sideways_speed_threshold
+	var is_slow: bool = relative_speed < wall_tip_speed
 	
 	# STEEP_SIDEWAYS: All three conditions must be true
 	if is_steep and is_across and is_slow:
@@ -842,35 +841,10 @@ func _update_stability_mode(state: PhysicsDirectBodyState3D) -> void:
 		_stability_mode = StabilityMode.NORMAL_GROUNDED
 
 
-func _apply_anti_slide(state: PhysicsDirectBodyState3D) -> void:
-	## Apply uphill force to counter gravity's downhill pull on slopes.
-	## Replaces the old lateral velocity deletion which broke sideways traversal.
-	
-	if not _is_grounded:
-		return
-	
-	# Project world gravity onto slope plane
-	var gravity_world: Vector3 = Vector3.DOWN * 9.8 * mass
-	var gravity_normal_component: float = gravity_world.dot(_ground_up)
-	var gravity_slope: Vector3 = gravity_world - _ground_up * gravity_normal_component
-	
-	# Skip if slope is nearly flat
-	if gravity_slope.length() < 0.1:
-		return
-	
-	# Speed gate using RELATIVE velocity (consistent with traction, works on platforms)
-	var relative_speed: float = _relative_velocity.length()
-	var speed_gate: float = clampf(relative_speed / (wall_grip_speed_threshold * 0.2), 0.0, 1.0)
-	
-	# Counter-force pointing uphill
-	var anti_slide_force: Vector3 = -gravity_slope * anti_slide_strength * speed_gate
-	
-	state.apply_central_force(anti_slide_force)
-
-
 func _apply_stabilization(state: PhysicsDirectBodyState3D, steer_input: float) -> void:
 	## Apply torque-based upright stabilization based on current stability mode.
 	## Uses mode-specific strength: strong for normal driving, weak when sideways on slopes.
+	## In STEEP_SIDEWAYS mode, applies tip-over assist when tilted past threshold.
 	
 	# === MODE-BASED EARLY EXIT ===
 	# AIR: No stabilization - player has full control for tricks
@@ -884,6 +858,32 @@ func _apply_stabilization(state: PhysicsDirectBodyState3D, steer_input: float) -
 		pass  # Continue with reduced values below
 	
 	var bike_up: Vector3 = global_transform.basis.y
+	
+	# === TIP-OVER ASSIST ===
+	# In STEEP_SIDEWAYS mode, when bike is tilted past threshold, apply destabilizing torque
+	if _stability_mode == StabilityMode.STEEP_SIDEWAYS:
+		var tilt_from_ground: float = 1.0 - bike_up.dot(_ground_up)  # 0 = aligned, 2 = upside down
+		var tilt_threshold: float = 0.3  # Start assisting tip-over at ~25 degrees tilt
+		
+		if tilt_from_ground > tilt_threshold:
+			# Calculate direction to fall (perpendicular to bike forward, toward gravity)
+			var fall_direction: Vector3 = Vector3.DOWN - _ground_up * Vector3.DOWN.dot(_ground_up)
+			if fall_direction.length() > 0.1:
+				fall_direction = fall_direction.normalized()
+				
+				# Scale tip-over torque by how far past threshold we are
+				var tip_factor: float = (tilt_from_ground - tilt_threshold) / (1.0 - tilt_threshold)
+				tip_factor = clampf(tip_factor, 0.0, 1.0)
+				
+				# Apply destabilizing torque in the direction bike is already falling
+				var tip_axis: Vector3 = global_transform.basis.z  # Roll axis
+				var tip_direction: float = signf(bike_up.cross(fall_direction).dot(tip_axis))
+				var tip_torque: float = tip_factor * 200.0  # Nm - accelerates the fall
+				
+				state.apply_torque(tip_axis * tip_direction * tip_torque)
+			
+			# Skip normal stabilization when actively tipping
+			return
 	
 	# Target: bike up should align with ground_up, plus steering lean
 	var lean_offset: float = 0.0
@@ -931,8 +931,9 @@ func _apply_stabilization(state: PhysicsDirectBodyState3D, steer_input: float) -
 	var correction_magnitude: float = error_angle * upright_strength
 	
 	# Damping torque (counter angular velocity on this axis)
+	# NOTE: Removed mass multiplier - damping_strength is now direct Nm/(rad/s)
 	var ang_vel_component: float = state.angular_velocity.dot(error_axis)
-	var damping_magnitude: float = -ang_vel_component * damping_strength * mass
+	var damping_magnitude: float = -ang_vel_component * damping_strength
 	
 	var total_torque: float = correction_magnitude + damping_magnitude
 	
@@ -970,7 +971,8 @@ func _apply_roll_damping(state: PhysicsDirectBodyState3D) -> void:
 			return
 	
 	# Apply counter-torque to damp roll rotation
-	var damping_torque: Vector3 = -roll_axis * roll_rate * damping_strength * mass
+	# NOTE: Removed mass multiplier - damping_strength is now direct Nm/(rad/s)
+	var damping_torque: Vector3 = -roll_axis * roll_rate * damping_strength
 	
 	# Clamp to prevent extreme forces
 	var max_roll_damping_torque: float = max_stabilization_torque * 0.5
@@ -982,8 +984,10 @@ func _apply_roll_damping(state: PhysicsDirectBodyState3D) -> void:
 
 
 func _apply_traction(state: PhysicsDirectBodyState3D, throttle: float, brake: float, drifting: bool) -> void:
-	## Apply force-based traction in the ground frame.
-	## Replaces the old velocity alignment which deleted lateral motion on slopes.
+	## Apply slope-aware traction in the ground frame.
+	## - Downhill: reduced braking, bike rolls freely with gravity
+	## - Uphill: increased grip, prevents rollback
+	## - Flat: gentle braking to stop
 	
 	if not _is_grounded:
 		return  # No traction while airborne
@@ -992,17 +996,40 @@ func _apply_traction(state: PhysicsDirectBodyState3D, throttle: float, brake: fl
 	var forward_speed: float = _relative_velocity.dot(_ground_forward)
 	var lateral_speed: float = _relative_velocity.dot(_ground_right)
 	
+	# === SLOPE FACTOR ===
+	# Calculate how much the bike is pointing downhill vs uphill
+	# Positive = facing downhill, Negative = facing uphill, Zero = flat
+	var slope_factor: float = _ground_forward.dot(Vector3.DOWN)
+	# Clamp to reasonable range (handles edge cases like vertical walls)
+	slope_factor = clampf(slope_factor, -0.9, 0.9)
+	
 	# === Forward traction ===
 	var target_speed: float = 0.0
+	var accel_time: float = traction_accel_time  # Fast response when throttling
+	
 	if throttle > 0:
 		target_speed = throttle * max_speed
 	elif brake > 0:
 		target_speed = -brake * max_speed * 0.3  # Reverse is slower
+	else:
+		# === TRUE FREE-ROLL: No input = no traction force ===
+		# Let gravity and friction handle it naturally
+		var abs_slope: float = absf(slope_factor)
+		
+		if abs_slope > 0.03:
+			# On any slope: apply ZERO traction force, let physics handle it
+			# This allows natural rolling with gravity
+			target_speed = forward_speed  # Match current speed = no force
+			accel_time = 1.0  # Doesn't matter since speed_error will be ~0
+		else:
+			# On flat ground: gentle braking to stop
+			target_speed = 0.0
+			accel_time = idle_brake_time
 	
 	var speed_error: float = target_speed - forward_speed
 	
 	# Desired acceleration, then convert to force: F = m * a
-	var desired_accel: float = speed_error / traction_accel_time
+	var desired_accel: float = speed_error / accel_time
 	var traction_force: float = desired_accel * mass
 	
 	# Clamp to engine/brake limits (Newtons)
@@ -1013,6 +1040,9 @@ func _apply_traction(state: PhysicsDirectBodyState3D, throttle: float, brake: fl
 	
 	# Additional safety clamp for seam transitions
 	traction_force = clampf(traction_force, -max_traction_force, max_traction_force)
+	
+	# NOTE: Downhill roll modulation REMOVED - true free-roll now handles slopes
+	# by applying zero traction force when no input on slopes
 	
 	state.apply_central_force(_ground_forward * traction_force)
 	

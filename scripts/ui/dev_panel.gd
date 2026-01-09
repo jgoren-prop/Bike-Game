@@ -20,17 +20,23 @@ var _bike: BikeController = null
 @onready var _steer_torque_slider: HSlider = $Panel/ScrollContainer/VBox/SteeringSection/TurnSpeedSlider
 @onready var _lean_torque_slider: HSlider = $Panel/ScrollContainer/VBox/SteeringSection/TurnInertiaSlider
 
-# NEW TRACTION MODEL sliders (Phase 10)
+# TRACTION MODEL sliders (simplified for true free-roll)
 @onready var _traction_accel_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/TractionAccelSlider
 @onready var _lateral_grip_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/LateralGripSlider
 @onready var _drift_lateral_grip_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/DriftLateralGripSlider
-@onready var _anti_slide_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/AntiSlideSlider
-@onready var _wall_grip_speed_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/WallGripSpeedSlider
+@onready var _idle_brake_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/IdleBrakeSlider
+@onready var _max_traction_slider: HSlider = $Panel/ScrollContainer/VBox/GripSection/MaxTractionSlider
 
-# STABILIZATION sliders
-@onready var _upright_torque_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/UprightTorqueSlider
+# STABILIZATION sliders (normal mode)
+@onready var _normal_stability_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/NormalStabilitySlider
+@onready var _normal_roll_damp_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/NormalRollDampSlider
 @onready var _lean_angle_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/LeanAngleSlider
-@onready var _stab_damp_slider: HSlider = $Panel/ScrollContainer/VBox/StabSection/StabDampSlider
+
+# STEEP SLOPE sliders (new - controls tipping behavior)
+@onready var _steep_upright_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/SteepUprightSlider
+@onready var _steep_roll_damp_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/SteepRollDampSlider
+@onready var _wall_tip_speed_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/WallTipSpeedSlider
+@onready var _steep_threshold_slider: HSlider = $Panel/ScrollContainer/VBox/SteepSection/SteepThresholdSlider
 
 # Jump slider
 @onready var _jump_slider: HSlider = $Panel/ScrollContainer/VBox/FrictionSection/JumpSlider
@@ -68,17 +74,23 @@ var _bike: BikeController = null
 @onready var _steer_torque_value: Label = $Panel/ScrollContainer/VBox/SteeringSection/TurnSpeedValue
 @onready var _lean_torque_value: Label = $Panel/ScrollContainer/VBox/SteeringSection/TurnInertiaValue
 
-# NEW TRACTION MODEL value labels (Phase 10)
+# TRACTION MODEL value labels
 @onready var _traction_accel_value: Label = $Panel/ScrollContainer/VBox/GripSection/TractionAccelValue
 @onready var _lateral_grip_value: Label = $Panel/ScrollContainer/VBox/GripSection/LateralGripValue
 @onready var _drift_lateral_grip_value: Label = $Panel/ScrollContainer/VBox/GripSection/DriftLateralGripValue
-@onready var _anti_slide_value: Label = $Panel/ScrollContainer/VBox/GripSection/AntiSlideValue
-@onready var _wall_grip_speed_value: Label = $Panel/ScrollContainer/VBox/GripSection/WallGripSpeedValue
+@onready var _idle_brake_value: Label = $Panel/ScrollContainer/VBox/GripSection/IdleBrakeValue
+@onready var _max_traction_value: Label = $Panel/ScrollContainer/VBox/GripSection/MaxTractionValue
 
 # STABILIZATION value labels
-@onready var _upright_torque_value: Label = $Panel/ScrollContainer/VBox/StabSection/UprightTorqueValue
+@onready var _normal_stability_value: Label = $Panel/ScrollContainer/VBox/StabSection/NormalStabilityValue
+@onready var _normal_roll_damp_value: Label = $Panel/ScrollContainer/VBox/StabSection/NormalRollDampValue
 @onready var _lean_angle_value: Label = $Panel/ScrollContainer/VBox/StabSection/LeanAngleValue
-@onready var _stab_damp_value: Label = $Panel/ScrollContainer/VBox/StabSection/StabDampValue
+
+# STEEP SLOPE value labels
+@onready var _steep_upright_value: Label = $Panel/ScrollContainer/VBox/SteepSection/SteepUprightValue
+@onready var _steep_roll_damp_value: Label = $Panel/ScrollContainer/VBox/SteepSection/SteepRollDampValue
+@onready var _wall_tip_speed_value: Label = $Panel/ScrollContainer/VBox/SteepSection/WallTipSpeedValue
+@onready var _steep_threshold_value: Label = $Panel/ScrollContainer/VBox/SteepSection/SteepThresholdValue
 
 @onready var _jump_value: Label = $Panel/ScrollContainer/VBox/FrictionSection/JumpValue
 
@@ -174,24 +186,33 @@ func _connect_sliders() -> void:
 		_steer_torque_slider.value_changed.connect(_on_steer_torque_changed)
 	if _lean_torque_slider:
 		_lean_torque_slider.value_changed.connect(_on_lean_torque_changed)
-	# NEW TRACTION MODEL sliders (Phase 10)
+	# TRACTION MODEL sliders
 	if _traction_accel_slider:
 		_traction_accel_slider.value_changed.connect(_on_traction_accel_changed)
 	if _lateral_grip_slider:
 		_lateral_grip_slider.value_changed.connect(_on_lateral_grip_changed)
 	if _drift_lateral_grip_slider:
 		_drift_lateral_grip_slider.value_changed.connect(_on_drift_lateral_grip_changed)
-	if _anti_slide_slider:
-		_anti_slide_slider.value_changed.connect(_on_anti_slide_changed)
-	if _wall_grip_speed_slider:
-		_wall_grip_speed_slider.value_changed.connect(_on_wall_grip_speed_changed)
-	# STABILIZATION sliders
-	if _upright_torque_slider:
-		_upright_torque_slider.value_changed.connect(_on_upright_torque_changed)
+	if _idle_brake_slider:
+		_idle_brake_slider.value_changed.connect(_on_idle_brake_changed)
+	if _max_traction_slider:
+		_max_traction_slider.value_changed.connect(_on_max_traction_changed)
+	# STABILIZATION sliders (normal mode)
+	if _normal_stability_slider:
+		_normal_stability_slider.value_changed.connect(_on_normal_stability_changed)
+	if _normal_roll_damp_slider:
+		_normal_roll_damp_slider.value_changed.connect(_on_normal_roll_damp_changed)
 	if _lean_angle_slider:
 		_lean_angle_slider.value_changed.connect(_on_lean_angle_changed)
-	if _stab_damp_slider:
-		_stab_damp_slider.value_changed.connect(_on_stab_damp_changed)
+	# STEEP SLOPE sliders
+	if _steep_upright_slider:
+		_steep_upright_slider.value_changed.connect(_on_steep_upright_changed)
+	if _steep_roll_damp_slider:
+		_steep_roll_damp_slider.value_changed.connect(_on_steep_roll_damp_changed)
+	if _wall_tip_speed_slider:
+		_wall_tip_speed_slider.value_changed.connect(_on_wall_tip_speed_changed)
+	if _steep_threshold_slider:
+		_steep_threshold_slider.value_changed.connect(_on_steep_threshold_changed)
 	if _jump_slider:
 		_jump_slider.value_changed.connect(_on_jump_changed)
 	# Arcade sliders
@@ -257,7 +278,7 @@ func _sync_sliders_from_bike() -> void:
 	if _lean_torque_slider:
 		_lean_torque_slider.value = _bike.lean_torque
 		_update_value_label(_lean_torque_value, _bike.lean_torque)
-	# NEW TRACTION MODEL sliders (Phase 10)
+	# TRACTION MODEL sliders
 	if _traction_accel_slider:
 		_traction_accel_slider.value = _bike.traction_accel_time
 		_update_value_label(_traction_accel_value, _bike.traction_accel_time, "s")
@@ -267,22 +288,35 @@ func _sync_sliders_from_bike() -> void:
 	if _drift_lateral_grip_slider:
 		_drift_lateral_grip_slider.value = _bike.drift_lateral_grip
 		_update_value_label(_drift_lateral_grip_value, _bike.drift_lateral_grip)
-	if _anti_slide_slider:
-		_anti_slide_slider.value = _bike.anti_slide_strength
-		_update_value_label(_anti_slide_value, _bike.anti_slide_strength)
-	if _wall_grip_speed_slider:
-		_wall_grip_speed_slider.value = _bike.wall_grip_speed_threshold
-		_update_value_label(_wall_grip_speed_value, _bike.wall_grip_speed_threshold, " m/s")
-	# STABILIZATION sliders
-	if _upright_torque_slider:
-		_upright_torque_slider.value = _bike.normal_upright_strength
-		_update_value_label(_upright_torque_value, _bike.normal_upright_strength)
+	if _idle_brake_slider:
+		_idle_brake_slider.value = _bike.idle_brake_time
+		_update_value_label(_idle_brake_value, _bike.idle_brake_time, "s")
+	if _max_traction_slider:
+		_max_traction_slider.value = _bike.max_traction_force
+		_update_value_label(_max_traction_value, _bike.max_traction_force, "N")
+	# STABILIZATION sliders (normal mode)
+	if _normal_stability_slider:
+		_normal_stability_slider.value = _bike.normal_upright_strength
+		_update_value_label(_normal_stability_value, _bike.normal_upright_strength)
+	if _normal_roll_damp_slider:
+		_normal_roll_damp_slider.value = _bike.normal_roll_damping
+		_update_value_label(_normal_roll_damp_value, _bike.normal_roll_damping)
 	if _lean_angle_slider:
 		_lean_angle_slider.value = _bike.lean_into_turn_angle
 		_update_value_label(_lean_angle_value, _bike.lean_into_turn_angle, " rad")
-	if _stab_damp_slider:
-		_stab_damp_slider.value = _bike.pitch_stabilization
-		_update_value_label(_stab_damp_value, _bike.pitch_stabilization)
+	# STEEP SLOPE sliders
+	if _steep_upright_slider:
+		_steep_upright_slider.value = _bike.steep_upright_strength
+		_update_value_label(_steep_upright_value, _bike.steep_upright_strength)
+	if _steep_roll_damp_slider:
+		_steep_roll_damp_slider.value = _bike.steep_roll_damping
+		_update_value_label(_steep_roll_damp_value, _bike.steep_roll_damping)
+	if _wall_tip_speed_slider:
+		_wall_tip_speed_slider.value = _bike.wall_tip_speed
+		_update_value_label(_wall_tip_speed_value, _bike.wall_tip_speed, " m/s")
+	if _steep_threshold_slider:
+		_steep_threshold_slider.value = _bike.steep_slope_threshold
+		_update_value_label(_steep_threshold_value, _bike.steep_slope_threshold)
 	if _jump_slider:
 		_jump_slider.value = _bike.jump_impulse
 		_update_value_label(_jump_value, _bike.jump_impulse)
@@ -386,7 +420,7 @@ func _on_lean_torque_changed(value: float) -> void:
 		_update_value_label(_lean_torque_value, value)
 
 
-# === NEW TRACTION MODEL CALLBACKS (Phase 10) ===
+# === TRACTION MODEL CALLBACKS ===
 
 func _on_traction_accel_changed(value: float) -> void:
 	if _bike:
@@ -406,24 +440,30 @@ func _on_drift_lateral_grip_changed(value: float) -> void:
 		_update_value_label(_drift_lateral_grip_value, value)
 
 
-func _on_anti_slide_changed(value: float) -> void:
+func _on_idle_brake_changed(value: float) -> void:
 	if _bike:
-		_bike.anti_slide_strength = value
-		_update_value_label(_anti_slide_value, value)
+		_bike.idle_brake_time = value
+		_update_value_label(_idle_brake_value, value, "s")
 
 
-func _on_wall_grip_speed_changed(value: float) -> void:
+func _on_max_traction_changed(value: float) -> void:
 	if _bike:
-		_bike.wall_grip_speed_threshold = value
-		_update_value_label(_wall_grip_speed_value, value, " m/s")
+		_bike.max_traction_force = value
+		_update_value_label(_max_traction_value, value, "N")
 
 
-# === STABILIZATION CALLBACKS ===
+# === STABILIZATION CALLBACKS (Normal Mode) ===
 
-func _on_upright_torque_changed(value: float) -> void:
+func _on_normal_stability_changed(value: float) -> void:
 	if _bike:
 		_bike.normal_upright_strength = value
-		_update_value_label(_upright_torque_value, value)
+		_update_value_label(_normal_stability_value, value)
+
+
+func _on_normal_roll_damp_changed(value: float) -> void:
+	if _bike:
+		_bike.normal_roll_damping = value
+		_update_value_label(_normal_roll_damp_value, value)
 
 
 func _on_lean_angle_changed(value: float) -> void:
@@ -432,10 +472,30 @@ func _on_lean_angle_changed(value: float) -> void:
 		_update_value_label(_lean_angle_value, value, " rad")
 
 
-func _on_stab_damp_changed(value: float) -> void:
+# === STEEP SLOPE CALLBACKS ===
+
+func _on_steep_upright_changed(value: float) -> void:
 	if _bike:
-		_bike.pitch_stabilization = value
-		_update_value_label(_stab_damp_value, value)
+		_bike.steep_upright_strength = value
+		_update_value_label(_steep_upright_value, value)
+
+
+func _on_steep_roll_damp_changed(value: float) -> void:
+	if _bike:
+		_bike.steep_roll_damping = value
+		_update_value_label(_steep_roll_damp_value, value)
+
+
+func _on_wall_tip_speed_changed(value: float) -> void:
+	if _bike:
+		_bike.wall_tip_speed = value
+		_update_value_label(_wall_tip_speed_value, value, " m/s")
+
+
+func _on_steep_threshold_changed(value: float) -> void:
+	if _bike:
+		_bike.steep_slope_threshold = value
+		_update_value_label(_steep_threshold_value, value)
 
 
 func _on_jump_changed(value: float) -> void:
@@ -566,12 +626,17 @@ func _on_copy_pressed() -> void:
 	text += "  Traction Accel Time: %.2fs\n" % _bike.traction_accel_time
 	text += "  Lateral Grip: %.1f\n" % _bike.lateral_grip_strength
 	text += "  Drift Lateral Grip: %.1f\n" % _bike.drift_lateral_grip
-	text += "  Anti-Slide Strength: %.2f\n" % _bike.anti_slide_strength
-	text += "  Wall Grip Speed: %.1f m/s\n" % _bike.wall_grip_speed_threshold
-	text += "\nSTABILIZATION:\n"
-	text += "  Upright Torque: %.1f\n" % _bike.normal_upright_strength
+	text += "  Idle Brake Time: %.2fs\n" % _bike.idle_brake_time
+	text += "  Max Traction Force: %.1fN\n" % _bike.max_traction_force
+	text += "\nSTABILIZATION (Normal):\n"
+	text += "  Normal Stability: %.1f\n" % _bike.normal_upright_strength
+	text += "  Normal Roll Damping: %.1f\n" % _bike.normal_roll_damping
 	text += "  Lean Angle: %.2f rad\n" % _bike.lean_into_turn_angle
-	text += "  Stabilization Damp: %.1f\n" % _bike.pitch_stabilization
+	text += "\nSTEEP SLOPE:\n"
+	text += "  Steep Upright Strength: %.1f\n" % _bike.steep_upright_strength
+	text += "  Steep Roll Damping: %.1f\n" % _bike.steep_roll_damping
+	text += "  Wall Tip Speed: %.1f m/s\n" % _bike.wall_tip_speed
+	text += "  Steep Slope Threshold: %.2f\n" % _bike.steep_slope_threshold
 	text += "\nJUMP:\n"
 	text += "  Jump Force: %.1f\n" % _bike.jump_impulse
 	text += "\nARCADE FEEL:\n"

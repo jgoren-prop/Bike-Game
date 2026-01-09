@@ -253,36 +253,36 @@ layout_mode = 2
 text = "2.0"
 horizontal_alignment = 2
 
-[node name="AntiSlideLabel" type="Label" parent="Panel/ScrollContainer/VBox/GripSection"]
+[node name="IdleBrakeLabel" type="Label" parent="Panel/ScrollContainer/VBox/GripSection"]
 layout_mode = 2
-text = "Anti-Slide Strength"
+text = "Idle Brake Time"
 
-[node name="AntiSlideSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/GripSection"]
+[node name="IdleBrakeSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/GripSection"]
 layout_mode = 2
-min_value = 0.0
-max_value = 1.0
-step = 0.05
-value = 0.8
+min_value = 0.5
+max_value = 20.0
+step = 0.1
+value = 1.5
 
-[node name="AntiSlideValue" type="Label" parent="Panel/ScrollContainer/VBox/GripSection"]
+[node name="IdleBrakeValue" type="Label" parent="Panel/ScrollContainer/VBox/GripSection"]
 layout_mode = 2
-text = "0.8"
+text = "1.5s"
 horizontal_alignment = 2
 
-[node name="WallGripSpeedLabel" type="Label" parent="Panel/ScrollContainer/VBox/GripSection"]
+[node name="MaxTractionLabel" type="Label" parent="Panel/ScrollContainer/VBox/GripSection"]
 layout_mode = 2
-text = "Wall Grip Speed"
+text = "Max Traction Force"
 
-[node name="WallGripSpeedSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/GripSection"]
+[node name="MaxTractionSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/GripSection"]
 layout_mode = 2
-min_value = 1.0
-max_value = 20.0
-step = 0.5
-value = 9.0
+min_value = 1000.0
+max_value = 10000.0
+step = 500.0
+value = 3000.0
 
-[node name="WallGripSpeedValue" type="Label" parent="Panel/ScrollContainer/VBox/GripSection"]
+[node name="MaxTractionValue" type="Label" parent="Panel/ScrollContainer/VBox/GripSection"]
 layout_mode = 2
-text = "9.0 m/s"
+text = "3000.0"
 horizontal_alignment = 2
 
 [node name="Sep3c" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
@@ -292,25 +292,41 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.5, 1, 1)
 theme_override_font_sizes/font_size = 16
-text = "STABILIZATION"
+text = "STABILIZATION (Normal)"
 
 [node name="StabSection" type="VBoxContainer" parent="Panel/ScrollContainer/VBox"]
 layout_mode = 2
 
-[node name="UprightTorqueLabel" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
+[node name="NormalStabilityLabel" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
 layout_mode = 2
-text = "Upright Torque"
+text = "Normal Stability"
 
-[node name="UprightTorqueSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/StabSection"]
+[node name="NormalStabilitySlider" type="HSlider" parent="Panel/ScrollContainer/VBox/StabSection"]
+layout_mode = 2
+min_value = 100.0
+max_value = 1000.0
+step = 25.0
+value = 500.0
+
+[node name="NormalStabilityValue" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
+layout_mode = 2
+text = "500.0"
+horizontal_alignment = 2
+
+[node name="NormalRollDampLabel" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
+layout_mode = 2
+text = "Normal Roll Damping"
+
+[node name="NormalRollDampSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/StabSection"]
 layout_mode = 2
 min_value = 50.0
 max_value = 500.0
 step = 10.0
-value = 200.0
+value = 150.0
 
-[node name="UprightTorqueValue" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
+[node name="NormalRollDampValue" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
 layout_mode = 2
-text = "80.0"
+text = "150.0"
 horizontal_alignment = 2
 
 [node name="LeanAngleLabel" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
@@ -329,20 +345,80 @@ layout_mode = 2
 text = "0.15 rad"
 horizontal_alignment = 2
 
-[node name="StabDampLabel" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
+[node name="Sep3d" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
 layout_mode = 2
-text = "Stabilization Damp"
 
-[node name="StabDampSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/StabSection"]
+[node name="SteepHeader" type="Label" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "STEEP SLOPE (Tip-Over)"
+
+[node name="SteepSection" type="VBoxContainer" parent="Panel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="SteepUprightLabel" type="Label" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+text = "Steep Upright Strength"
+
+[node name="SteepUprightSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+min_value = 10.0
+max_value = 200.0
+step = 5.0
+value = 40.0
+
+[node name="SteepUprightValue" type="Label" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+text = "40.0"
+horizontal_alignment = 2
+
+[node name="SteepRollDampLabel" type="Label" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+text = "Steep Roll Damping"
+
+[node name="SteepRollDampSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SteepSection"]
 layout_mode = 2
 min_value = 1.0
-max_value = 15.0
-step = 0.5
-value = 5.0
+max_value = 50.0
+step = 1.0
+value = 10.0
 
-[node name="StabDampValue" type="Label" parent="Panel/ScrollContainer/VBox/StabSection"]
+[node name="SteepRollDampValue" type="Label" parent="Panel/ScrollContainer/VBox/SteepSection"]
 layout_mode = 2
-text = "3.0"
+text = "10.0"
+horizontal_alignment = 2
+
+[node name="WallTipSpeedLabel" type="Label" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+text = "Wall Tip Speed"
+
+[node name="WallTipSpeedSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+min_value = 2.0
+max_value = 10.0
+step = 0.5
+value = 6.0
+
+[node name="WallTipSpeedValue" type="Label" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+text = "6.0 m/s"
+horizontal_alignment = 2
+
+[node name="SteepThresholdLabel" type="Label" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+text = "Steep Slope Threshold"
+
+[node name="SteepThresholdSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+min_value = 0.3
+max_value = 0.8
+step = 0.05
+value = 0.5
+
+[node name="SteepThresholdValue" type="Label" parent="Panel/ScrollContainer/VBox/SteepSection"]
+layout_mode = 2
+text = "0.5"
 horizontal_alignment = 2
 
 [node name="Sep4" type="HSeparator" parent="Panel/ScrollContainer/VBox"]
@@ -562,14 +638,14 @@ text = "Stiffness"
 
 [node name="SuspStiffnessSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SuspensionSection"]
 layout_mode = 2
-min_value = 100.0
-max_value = 3000.0
+min_value = 200.0
+max_value = 2500.0
 step = 50.0
-value = 800.0
+value = 1200.0
 
 [node name="SuspStiffnessValue" type="Label" parent="Panel/ScrollContainer/VBox/SuspensionSection"]
 layout_mode = 2
-text = "800.0"
+text = "1200.0"
 horizontal_alignment = 2
 
 [node name="SuspDampingLabel" type="Label" parent="Panel/ScrollContainer/VBox/SuspensionSection"]
@@ -578,14 +654,14 @@ text = "Damping"
 
 [node name="SuspDampingSlider" type="HSlider" parent="Panel/ScrollContainer/VBox/SuspensionSection"]
 layout_mode = 2
-min_value = 10.0
-max_value = 300.0
-step = 10.0
-value = 80.0
+min_value = 2.0
+max_value = 50.0
+step = 1.0
+value = 8.0
 
 [node name="SuspDampingValue" type="Label" parent="Panel/ScrollContainer/VBox/SuspensionSection"]
 layout_mode = 2
-text = "80.0"
+text = "8.0"
 horizontal_alignment = 2
 
 [node name="SuspRestLabel" type="Label" parent="Panel/ScrollContainer/VBox/SuspensionSection"]
