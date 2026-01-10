@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.35, 0.3, 0.25, 1)
+metallic = 0.2
+roughness = 0.7
+
+[node name="loop_full" type="CSGTorus3D"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 8, 0)
+use_collision = true
+inner_radius = 7.0
+outer_radius = 8.5
+sides = 32
+ring_sides = 12
+material = SubResource("StandardMaterial3D_1")
+

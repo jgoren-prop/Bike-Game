@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/rotating_barrier.gd" id="1_rotating"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_arm"]
+size = Vector3(0.5, 0.5, 4)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hub"]
+top_radius = 0.4
+bottom_radius = 0.4
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.7, 0.3, 0.15, 1)
+emission_enabled = true
+emission = Color(0.3, 0.1, 0.02, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
+size = Vector3(1, 1, 4)
+
+[node name="rotating_barrier" type="Node3D"]
+script = ExtResource("1_rotating")
+rotation_speed = 1.5
+knockback_force = 16.0
+
+[node name="Arm" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+mesh = SubResource("BoxMesh_arm")
+surface_material_override/0 = SubResource("StandardMaterial3D_1")
+
+[node name="Hub" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_hub")
+surface_material_override/0 = SubResource("StandardMaterial3D_1")
+
+[node name="Hitbox" type="Area3D" parent="."]
+
+[node name="HitboxShape" type="CollisionShape3D" parent="Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+shape = SubResource("BoxShape3D_hitbox")
+

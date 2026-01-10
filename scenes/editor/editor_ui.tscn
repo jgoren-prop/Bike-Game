@@ -1,0 +1,186 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/editor/editor_ui.gd" id="1_editor_ui"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.1, 0.12, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.4, 0.4, 0.5, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_list"]
+bg_color = Color(0.06, 0.06, 0.08, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.25, 0.3, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="Theme" id="Theme_editor"]
+default_font_size = 24
+
+[node name="EditorUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_editor")
+script = ExtResource("1_editor_ui")
+
+[node name="LeftPanel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 420.0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="LeftPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="LeftPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "LEVEL EDITOR"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="LeftPanel/VBox"]
+layout_mode = 2
+
+[node name="CategoryLabel" type="Label" parent="LeftPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Categories:"
+
+[node name="CategoryList" type="ItemList" parent="LeftPanel/VBox"]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_margin = 8
+theme_override_constants/v_separation = 8
+theme_override_styles/panel = SubResource("StyleBoxFlat_list")
+allow_reselect = true
+fixed_icon_size = Vector2i(0, 0)
+
+[node name="PrefabLabel" type="Label" parent="LeftPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Prefabs:"
+
+[node name="PrefabList" type="ItemList" parent="LeftPanel/VBox"]
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_margin = 8
+theme_override_constants/v_separation = 8
+theme_override_styles/panel = SubResource("StyleBoxFlat_list")
+allow_reselect = true
+
+[node name="TopBar" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 440.0
+offset_bottom = 80.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="HBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="ModeButton" type="Button" parent="TopBar/HBox"]
+custom_minimum_size = Vector2(180, 54)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Play (Tab)"
+
+[node name="Separator1" type="VSeparator" parent="TopBar/HBox"]
+layout_mode = 2
+
+[node name="GridLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Grid:"
+vertical_alignment = 1
+
+[node name="GridOption" type="OptionButton" parent="TopBar/HBox"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+
+[node name="Separator2" type="VSeparator" parent="TopBar/HBox"]
+layout_mode = 2
+
+[node name="ToolLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Tool:"
+vertical_alignment = 1
+
+[node name="ToolInfo" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.4, 0.9, 0.4, 1)
+text = "Place (1)"
+vertical_alignment = 1
+
+[node name="Separator3" type="VSeparator" parent="TopBar/HBox"]
+layout_mode = 2
+
+[node name="ClearButton" type="Button" parent="TopBar/HBox"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Clear All"
+
+[node name="SaveButton" type="Button" parent="TopBar/HBox"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Save"
+
+[node name="LoadButton" type="Button" parent="TopBar/HBox"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Load"
+
+[node name="BottomBar" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -70.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="InfoLabel" type="Label" parent="BottomBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Left-click: Place | R/T: Rotate | Q/E: Lower/Raise | 1: Place | 2: Select | Tab: Play/Edit"
+horizontal_alignment = 1
+vertical_alignment = 1

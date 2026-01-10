@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/seesaw_platform.gd" id="1_seesaw"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(3, 0.4, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1"]
+size = Vector3(3, 0.4, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.5, 0.35, 0.2, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_1"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 1.5
+
+[node name="seesaw" type="RigidBody3D"]
+script = ExtResource("1_seesaw")
+max_tilt_angle = 22.0
+reset_speed = 0.7
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_1")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_1")
+surface_material_override/0 = SubResource("StandardMaterial3D_1")
+
+[node name="Pivot" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.95, 0)
+mesh = SubResource("CylinderMesh_1")
+

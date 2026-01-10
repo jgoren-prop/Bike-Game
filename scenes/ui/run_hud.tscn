@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/run_hud.gd" id="1_run_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/flip_notification.tscn" id="2_flip_notif"]
 
 [node name="RunHUD" type="CanvasLayer"]
 script = ExtResource("1_run_hud")
@@ -37,3 +38,5 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "POT: $100"
 horizontal_alignment = 2
+
+[node name="FlipNotification" parent="." instance=ExtResource("2_flip_notif")]

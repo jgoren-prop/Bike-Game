@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.4, 0.35, 0.28, 1)
+metallic = 0.15
+roughness = 0.75
+
+[node name="halfpipe" type="CSGCombiner3D"]
+use_collision = true
+
+[node name="Cylinder" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+radius = 6.0
+height = 20.0
+sides = 24
+material = SubResource("StandardMaterial3D_1")
+
+[node name="CutterBox" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+operation = 2
+size = Vector3(14, 6, 22)
+

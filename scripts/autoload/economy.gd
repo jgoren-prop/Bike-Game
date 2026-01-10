@@ -56,3 +56,9 @@ func spend(cost: int) -> bool:
 func add_to_wallet(amount: int) -> void:
 	wallet += amount
 	wallet_changed.emit(wallet)
+
+
+func add_to_pot(amount: int) -> void:
+	## Add bonus points to the pot (e.g., from tricks)
+	pot += amount
+	pot_changed.emit(pot)

@@ -179,8 +179,16 @@ var _landing_grace_timer: float = 0.0  # Reduces alignment right after landing
 @onready var _rear_wheel_probe: ShapeCast3D = $RearWheelProbe
 
 signal speed_changed(speed: float)
+signal flip_completed(flip_type: String, rotation_count: int)
 
 var _bump_assist_active: bool = false  # Track if we're currently assisting a bump climb
+
+# === FLIP TRACKING ===
+# Tracks rotation through inverted states to count flips
+var _is_currently_inverted: bool = false   # Is bike upside down right now?
+var _inversion_count: int = 0              # How many times we entered inverted state
+var _flip_direction: int = 0               # +1 = frontflip, -1 = backflip
+var _peak_inversion: float = 1.0           # Most inverted we got (lowest dot product)
 
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 	## Physics-critical operations that must run during physics step.
@@ -242,6 +250,9 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 
 
 func _ready() -> void:
+	# Add to group for easy discovery by UI
+	add_to_group("bike")
+	
 	# Apply RigidBody3D physics properties from exported vars
 	mass = bike_mass
 	linear_damp = bike_drag
@@ -615,6 +626,47 @@ func _physics_process(delta: float) -> void:
 		# Just landed - trigger squash and grace period!
 		_landing_squash = landing_squash_amount
 		_landing_grace_timer = 0.3  # 300ms of reduced alignment for smooth landing
+		
+		# === FLIP COMPLETION CHECK ===
+		# Count flips based on how many times we went inverted
+		# Landing upright after going inverted = completed those flips
+		var landing_upright: bool = global_transform.basis.y.dot(Vector3.UP) > 0.1
+		
+		# Debug output
+		print("[FLIP DEBUG] inversions=%d, landing_upright=%s, peak=%.2f, currently_inverted=%s" % [
+			_inversion_count, landing_upright, _peak_inversion, _is_currently_inverted
+		])
+		
+		if _inversion_count > 0 and landing_upright:
+			var flip_name: String = "FRONTFLIP" if _flip_direction > 0 else "BACKFLIP"
+			print("[FLIP] Landed with %d %s!" % [_inversion_count, flip_name])
+			flip_completed.emit(flip_name, _inversion_count)
+		
+		# Reset flip tracking on landing
+		_inversion_count = 0
+		_flip_direction = 0
+		_is_currently_inverted = false
+		_peak_inversion = 1.0
+	
+	# Track airborne flip rotation
+	if not wheels_touching:
+		if _was_airborne:
+			# Continuing in air - track flip state
+			_track_flip_rotation(delta)
+		else:
+			# Just became airborne - initialize tracking
+			_inversion_count = 0
+			_flip_direction = 0
+			_peak_inversion = 1.0
+			# Check if we're ALREADY inverted at launch (e.g., half-pipe facing up)
+			var up_dot: float = global_transform.basis.y.dot(Vector3.UP)
+			_is_currently_inverted = up_dot < -0.2
+			# If starting inverted, count it!
+			if _is_currently_inverted:
+				_inversion_count = 1
+				var pitch_rate: float = angular_velocity.dot(global_transform.basis.x)
+				_flip_direction = 1 if pitch_rate > 0 else -1
+	
 	_was_airborne = not wheels_touching
 
 	# Recover from squash quickly
@@ -1500,6 +1552,40 @@ func _animate_bike(delta: float) -> void:
 			_pedal_arm_left.rotation.y = sin(Time.get_ticks_msec() * 0.01 * pedal_speed) * 0.5
 		if _pedal_arm_right:
 			_pedal_arm_right.rotation.y = sin(Time.get_ticks_msec() * 0.01 * pedal_speed + PI) * 0.5
+
+
+# === FLIP TRACKING ===
+
+func _track_flip_rotation(_delta: float) -> void:
+	## Track when bike passes through inverted orientation.
+	## Each time we enter inverted state = potential flip.
+	## Flip completes when we exit inverted or land upright.
+	
+	var bike_up: Vector3 = global_transform.basis.y
+	var up_alignment: float = bike_up.dot(Vector3.UP)
+	
+	# Track peak inversion (how upside down we got)
+	_peak_inversion = minf(_peak_inversion, up_alignment)
+	
+	# Check if we're inverted (upside down) - use threshold with hysteresis
+	var now_inverted: bool
+	if _is_currently_inverted:
+		# Currently inverted - need to get past 0.0 to exit
+		now_inverted = up_alignment < 0.0
+	else:
+		# Currently upright - need to get below -0.2 to enter inverted
+		now_inverted = up_alignment < -0.2
+	
+	# Detect entering inverted state
+	if now_inverted and not _is_currently_inverted:
+		_inversion_count += 1
+		
+		# Determine flip direction from angular velocity
+		if _flip_direction == 0:
+			var pitch_rate: float = angular_velocity.dot(global_transform.basis.x)
+			_flip_direction = 1 if pitch_rate > 0 else -1
+	
+	_is_currently_inverted = now_inverted
 
 
 # === PUBLIC API ===

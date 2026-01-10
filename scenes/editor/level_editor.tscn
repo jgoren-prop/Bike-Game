@@ -1,0 +1,150 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/editor/level_editor.gd" id="1_level_editor"]
+[ext_resource type="Script" path="res://scripts/editor/editor_camera.gd" id="2_editor_camera"]
+[ext_resource type="Script" path="res://scripts/editor/placement_system.gd" id="3_placement"]
+[ext_resource type="Script" path="res://scripts/editor/selection_system.gd" id="4_selection"]
+[ext_resource type="Script" path="res://scripts/editor/level_serializer.gd" id="5_serializer"]
+[ext_resource type="PackedScene" path="res://scenes/editor/editor_ui.tscn" id="6_editor_ui"]
+[ext_resource type="Shader" path="res://shaders/editor_grid.gdshader" id="7_grid_shader"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.2, 0.22, 0.18, 1)
+
+[sub_resource type="Environment" id="Environment_editor"]
+background_mode = 1
+background_color = Color(0.12, 0.14, 0.18, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.4, 0.45, 0.5, 1)
+ambient_light_energy = 0.6
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_grid"]
+size = Vector2(200, 200)
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_grid"]
+render_priority = 1
+shader = ExtResource("7_grid_shader")
+shader_parameter/grid_size = 2.0
+shader_parameter/line_thickness = 0.04
+shader_parameter/line_color = Color(0.4, 0.45, 0.5, 0.5)
+shader_parameter/major_line_color = Color(0.6, 0.65, 0.7, 0.7)
+shader_parameter/major_line_every = 5
+shader_parameter/fade_distance = 100.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_spawn_base"]
+top_radius = 1.5
+bottom_radius = 1.5
+height = 0.15
+
+[sub_resource type="StandardMaterial3D" id="Mat_spawn_base"]
+transparency = 1
+albedo_color = Color(0.2, 0.9, 0.3, 0.7)
+emission_enabled = true
+emission = Color(0.2, 0.9, 0.3, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_spawn_ring"]
+top_radius = 1.8
+bottom_radius = 1.8
+height = 0.08
+
+[sub_resource type="StandardMaterial3D" id="Mat_spawn_ring"]
+transparency = 1
+albedo_color = Color(0.1, 0.7, 0.2, 0.5)
+emission_enabled = true
+emission = Color(0.1, 0.7, 0.2, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_spawn_arrow"]
+size = Vector3(0.4, 0.1, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_spawn_arrow"]
+albedo_color = Color(1, 1, 1, 0.9)
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 1.0
+
+[sub_resource type="PrismMesh" id="PrismMesh_spawn_arrow_tip"]
+size = Vector3(0.8, 0.12, 0.6)
+
+[node name="LevelEditor" type="Node3D"]
+script = ExtResource("1_level_editor")
+
+[node name="EditorCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9, -0.44, 0, 0.44, 0.9, 0, 12, 20)
+current = true
+fov = 70.0
+script = ExtResource("2_editor_camera")
+
+[node name="PlacementSystem" type="Node" parent="."]
+script = ExtResource("3_placement")
+
+[node name="SelectionSystem" type="Node" parent="."]
+script = ExtResource("4_selection")
+
+[node name="LevelSerializer" type="Node" parent="."]
+script = ExtResource("5_serializer")
+
+[node name="ObjectsContainer" type="Node3D" parent="."]
+
+[node name="GroundPlane" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="GroundPlane"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="Mesh" type="MeshInstance3D" parent="GroundPlane"]
+mesh = SubResource("BoxMesh_ground")
+surface_material_override/0 = SubResource("Mat_ground")
+
+[node name="GridOverlay" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("PlaneMesh_grid")
+surface_material_override/0 = SubResource("ShaderMat_grid")
+
+[node name="SpawnIndicator" type="Node3D" parent="."]
+
+[node name="Base" type="MeshInstance3D" parent="SpawnIndicator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+mesh = SubResource("CylinderMesh_spawn_base")
+surface_material_override/0 = SubResource("Mat_spawn_base")
+
+[node name="OuterRing" type="MeshInstance3D" parent="SpawnIndicator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("CylinderMesh_spawn_ring")
+surface_material_override/0 = SubResource("Mat_spawn_ring")
+
+[node name="Arrow" type="MeshInstance3D" parent="SpawnIndicator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -0.3)
+mesh = SubResource("BoxMesh_spawn_arrow")
+surface_material_override/0 = SubResource("Mat_spawn_arrow")
+
+[node name="ArrowTip" type="MeshInstance3D" parent="SpawnIndicator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -1.2)
+mesh = SubResource("PrismMesh_spawn_arrow_tip")
+surface_material_override/0 = SubResource("Mat_spawn_arrow")
+
+[node name="Label3D" type="Label3D" parent="SpawnIndicator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+billboard = 1
+text = "SPAWN POINT"
+font_size = 72
+outline_size = 12
+modulate = Color(0.2, 1, 0.3, 1)
+
+[node name="EditorUI" parent="." instance=ExtResource("6_editor_ui")]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 50, 0)
+light_color = Color(1, 0.98, 0.95, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_editor")
