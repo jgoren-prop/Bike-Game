@@ -26,3 +26,4 @@ shape = SubResource("BoxShape3D_1")
 mesh = SubResource("BoxMesh_1")
 surface_material_override/0 = SubResource("StandardMaterial3D_1")
 
+

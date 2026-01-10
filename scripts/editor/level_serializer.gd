@@ -198,3 +198,4 @@ func _array_to_vec3(arr: Array) -> Vector3:
 		return Vector3.ZERO
 	return Vector3(arr[0], arr[1], arr[2])
 
+

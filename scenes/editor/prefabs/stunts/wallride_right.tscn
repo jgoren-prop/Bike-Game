@@ -11,3 +11,4 @@ use_collision = true
 size = Vector3(1, 8, 20)
 material = SubResource("StandardMaterial3D_1")
 
+

@@ -31,3 +31,4 @@ surface_material_override/0 = SubResource("StandardMaterial3D_1")
 [node name="TriggerShape" type="CollisionShape3D" parent="Trigger"]
 shape = SubResource("BoxShape3D_1")
 
+

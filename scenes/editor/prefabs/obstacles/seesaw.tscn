@@ -32,3 +32,4 @@ surface_material_override/0 = SubResource("StandardMaterial3D_1")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.95, 0)
 mesh = SubResource("CylinderMesh_1")
 
+

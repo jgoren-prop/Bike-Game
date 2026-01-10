@@ -26,3 +26,4 @@ transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.5, 1)
 mesh = SubResource("CylinderMesh_arrow")
 surface_material_override/0 = SubResource("StandardMaterial3D_1")
 
+

@@ -40,3 +40,4 @@ void fragment() {
 	ALPHA = alpha * color.a;
 }
 
+

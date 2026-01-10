@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://buxj72q75k38i"]
+[gd_scene load_steps=29 format=3 uid="uid://buxj72q75k38i"]
 
 [ext_resource type="Script" uid="uid://48tv28sjad6l" path="res://scripts/bike/bike_controller.gd" id="1_bike_ctrl"]
 [ext_resource type="PackedScene" uid="uid://raccoon_rider_01" path="res://scenes/bike/raccoon_rider.tscn" id="2_raccoon"]
@@ -21,9 +21,9 @@ bottom_radius = 0.045
 height = 0.65
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frame"]
-albedo_color = Color(0.95, 0.75, 0.1, 1)
-metallic = 0.4
-roughness = 0.5
+albedo_color = Color(0.88, 0.72, 0.15, 1)
+metallic = 0.15
+roughness = 0.55
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_frame_thin"]
 top_radius = 0.035
@@ -41,9 +41,9 @@ bottom_radius = 0.025
 height = 0.2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dark"]
-albedo_color = Color(0.15, 0.15, 0.18, 1)
-metallic = 0.3
-roughness = 0.6
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+metallic = 0.1
+roughness = 0.7
 
 [sub_resource type="BoxMesh" id="BoxMesh_seat"]
 size = Vector3(0.12, 0.05, 0.22)
@@ -76,7 +76,7 @@ ring_segments = 12
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tire"]
 albedo_color = Color(0.12, 0.12, 0.12, 1)
-roughness = 0.95
+roughness = 0.92
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_hub"]
 top_radius = 0.08
@@ -85,9 +85,9 @@ height = 0.1
 radial_segments = 16
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_silver"]
-albedo_color = Color(0.6, 0.6, 0.65, 1)
-metallic = 0.8
-roughness = 0.3
+albedo_color = Color(0.6, 0.62, 0.65, 1)
+metallic = 0.5
+roughness = 0.4
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_spoke"]
 top_radius = 0.015
@@ -101,6 +101,37 @@ height = 0.16
 
 [sub_resource type="BoxMesh" id="BoxMesh_pedal"]
 size = Vector3(0.1, 0.02, 0.06)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dust"]
+transparency = 1
+albedo_color = Color(0.6, 0.55, 0.45, 0.6)
+emission_enabled = true
+emission = Color(0.4, 0.38, 0.32, 1)
+emission_energy_multiplier = 0.2
+billboard_mode = 3
+
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(0.7, 0.65, 0.55, 0, 0.6, 0.55, 0.45, 0.5, 0.5, 0.48, 0.4, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dust"]
+gradient = SubResource("Gradient_dust")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dust"]
+lifetime_randomness = 0.3
+particle_flag_disable_z = false
+emission_shape = 1
+emission_sphere_radius = 0.15
+direction = Vector3(0, 1, 0)
+spread = 45.0
+initial_velocity_min = 0.5
+initial_velocity_max = 1.5
+gravity = Vector3(0, -2, 0)
+scale_min = 0.15
+scale_max = 0.35
+scale_over_velocity_min = 0.0
+scale_over_velocity_max = 0.5
+color_ramp = SubResource("GradientTexture1D_dust")
 
 [node name="Bike" type="RigidBody3D"]
 mass = 60.0
@@ -326,3 +357,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 [node name="Camera3D" type="Camera3D" parent="CameraPivot"]
 transform = Transform3D(-1, 0, 0, 0, 0.906, 0.423, 0, 0.423, -0.906, 0, 4, -8)
 current = true
+
+[node name="FrontDustParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0.65)
+emitting = false
+amount = 6
+lifetime = 0.5
+visibility_aabb = AABB(-2, -1, -2, 4, 3, 4)
+process_material = SubResource("ParticleProcessMaterial_dust")
+draw_pass_1 = SubResource("BoxMesh_pedal")
+
+[node name="RearDustParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.6)
+emitting = false
+amount = 8
+lifetime = 0.5
+visibility_aabb = AABB(-2, -1, -2, 4, 3, 4)
+process_material = SubResource("ParticleProcessMaterial_dust")
+draw_pass_1 = SubResource("BoxMesh_pedal")

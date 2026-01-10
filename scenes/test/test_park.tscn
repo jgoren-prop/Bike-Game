@@ -1,9 +1,218 @@
-[gd_scene load_steps=45 format=3 uid="uid://ctestpark001"]
+[gd_scene load_steps=55 format=3 uid="uid://ctestpark001"]
 
 [ext_resource type="Script" uid="uid://bcoo1uy45xbuf" path="res://scripts/test/test_park.gd" id="1_park"]
 [ext_resource type="Script" uid="uid://do6bx1vi82o46" path="res://scripts/systems/moving_platform.gd" id="2_moving"]
 [ext_resource type="Script" uid="uid://bc3fj2vma4hht" path="res://scripts/systems/swinging_obstacle.gd" id="3_swing"]
 [ext_resource type="Script" uid="uid://ck8iwd0ujmkdg" path="res://scripts/systems/rotating_barrier.gd" id="4_rotate"]
+[ext_resource type="Shader" path="res://shaders/toon_surface.gdshader" id="5_toon"]
+[ext_resource type="Shader" path="res://shaders/grass_ground.gdshader" id="6_grass"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSky_cozy"]
+sky_top_color = Color(0.35, 0.55, 0.9, 1)
+sky_horizon_color = Color(0.7, 0.82, 0.95, 1)
+sky_curve = 0.08
+ground_bottom_color = Color(0.4, 0.45, 0.35, 1)
+ground_horizon_color = Color(0.6, 0.65, 0.55, 1)
+ground_curve = 0.02
+sun_angle_max = 30.0
+sun_curve = 0.04
+
+[sub_resource type="Sky" id="Sky_cozy"]
+sky_material = SubResource("ProceduralSky_cozy")
+
+[sub_resource type="Environment" id="Environment_cozy"]
+background_mode = 2
+sky = SubResource("Sky_cozy")
+ambient_light_source = 2
+ambient_light_color = Color(0.55, 0.6, 0.7, 1)
+ambient_light_sky_contribution = 0.5
+ambient_light_energy = 0.2
+tonemap_mode = 2
+tonemap_white = 1.0
+glow_enabled = true
+glow_intensity = 0.2
+glow_strength = 0.5
+glow_bloom = 0.05
+glow_blend_mode = 0
+fog_enabled = true
+fog_light_color = Color(0.7, 0.75, 0.8, 1)
+fog_light_energy = 0.1
+fog_sun_scatter = 0.05
+fog_density = 0.0003
+fog_sky_affect = 0.15
+adjustment_enabled = true
+adjustment_brightness = 0.95
+adjustment_contrast = 1.0
+adjustment_saturation = 1.05
+
+[sub_resource type="StandardMaterial3D" id="Mat_asphalt"]
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Mat_road_line"]
+albedo_color = Color(0.9, 0.9, 0.88, 1)
+roughness = 0.7
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_grass"]
+shader = ExtResource("6_grass")
+shader_parameter/base_color = Color(0.32, 0.45, 0.25, 1)
+shader_parameter/highlight_color = Color(0.45, 0.55, 0.32, 1)
+shader_parameter/shadow_color = Color(0.2, 0.3, 0.16, 1)
+shader_parameter/noise_scale = 0.05
+shader_parameter/color_variation = 0.3
+shader_parameter/shadow_threshold = 0.0
+shader_parameter/shadow_softness = 0.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_ramp_brown"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.52, 0.38, 0.26, 1)
+shader_parameter/shadow_color = Color(0.28, 0.2, 0.14, 1)
+shader_parameter/shadow_threshold = 0.0
+shader_parameter/shadow_softness = 0.06
+shader_parameter/rim_color = Color(1.0, 0.98, 0.95, 1)
+shader_parameter/rim_power = 3.0
+shader_parameter/rim_intensity = 0.12
+shader_parameter/specular_smoothness = 0.25
+shader_parameter/specular_intensity = 0.08
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_yellow"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.85, 0.75, 0.2, 1)
+shader_parameter/shadow_color = Color(0.45, 0.38, 0.1, 1)
+shader_parameter/shadow_threshold = 0.0
+shader_parameter/shadow_softness = 0.06
+shader_parameter/rim_color = Color(1.0, 1.0, 0.95, 1)
+shader_parameter/rim_power = 3.0
+shader_parameter/rim_intensity = 0.1
+shader_parameter/specular_smoothness = 0.3
+shader_parameter/specular_intensity = 0.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_rail"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.68, 0.68, 0.72, 1)
+shader_parameter/shadow_color = Color(0.38, 0.38, 0.42, 1)
+shader_parameter/shadow_threshold = 0.05
+shader_parameter/shadow_softness = 0.05
+shader_parameter/rim_color = Color(1.0, 1.0, 1.0, 1)
+shader_parameter/rim_power = 2.5
+shader_parameter/rim_intensity = 0.18
+shader_parameter/specular_smoothness = 0.5
+shader_parameter/specular_intensity = 0.15
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_platform"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.32, 0.52, 0.32, 1)
+shader_parameter/shadow_color = Color(0.18, 0.3, 0.18, 1)
+shader_parameter/shadow_threshold = 0.0
+shader_parameter/shadow_softness = 0.06
+shader_parameter/rim_color = Color(0.95, 1.0, 0.92, 1)
+shader_parameter/rim_power = 3.0
+shader_parameter/rim_intensity = 0.1
+shader_parameter/specular_smoothness = 0.2
+shader_parameter/specular_intensity = 0.05
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_obstacle"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.75, 0.22, 0.18, 1)
+shader_parameter/shadow_color = Color(0.4, 0.1, 0.08, 1)
+shader_parameter/shadow_threshold = -0.1
+shader_parameter/shadow_softness = 0.06
+shader_parameter/rim_color = Color(1.0, 0.5, 0.4, 1)
+shader_parameter/rim_power = 2.5
+shader_parameter/rim_intensity = 0.2
+shader_parameter/specular_smoothness = 0.2
+shader_parameter/specular_intensity = 0.08
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_concrete"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.45, 0.45, 0.48, 1)
+shader_parameter/shadow_color = Color(0.25, 0.25, 0.28, 1)
+shader_parameter/shadow_threshold = 0.0
+shader_parameter/shadow_softness = 0.06
+shader_parameter/rim_color = Color(0.92, 0.92, 0.95, 1)
+shader_parameter/rim_power = 3.5
+shader_parameter/rim_intensity = 0.1
+shader_parameter/specular_smoothness = 0.15
+shader_parameter/specular_intensity = 0.05
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_tree_trunk"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.42, 0.3, 0.2, 1)
+shader_parameter/shadow_color = Color(0.22, 0.16, 0.1, 1)
+shader_parameter/shadow_threshold = 0.0
+shader_parameter/shadow_softness = 0.06
+shader_parameter/rim_color = Color(0.9, 0.85, 0.75, 1)
+shader_parameter/rim_power = 3.5
+shader_parameter/rim_intensity = 0.1
+shader_parameter/specular_smoothness = 0.1
+shader_parameter/specular_intensity = 0.03
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_foliage"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.28, 0.48, 0.25, 1)
+shader_parameter/shadow_color = Color(0.14, 0.28, 0.12, 1)
+shader_parameter/shadow_threshold = -0.05
+shader_parameter/shadow_softness = 0.06
+shader_parameter/rim_color = Color(0.8, 1.0, 0.7, 1)
+shader_parameter/rim_power = 2.5
+shader_parameter/rim_intensity = 0.15
+shader_parameter/specular_smoothness = 0.15
+shader_parameter/specular_intensity = 0.05
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_rock"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.48, 0.46, 0.44, 1)
+shader_parameter/shadow_color = Color(0.26, 0.24, 0.22, 1)
+shader_parameter/shadow_threshold = 0.0
+shader_parameter/shadow_softness = 0.06
+shader_parameter/rim_color = Color(0.9, 0.9, 0.88, 1)
+shader_parameter/rim_power = 3.5
+shader_parameter/rim_intensity = 0.1
+shader_parameter/specular_smoothness = 0.1
+shader_parameter/specular_intensity = 0.03
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_hill"]
+shader = ExtResource("5_toon")
+shader_parameter/albedo_color = Color(0.38, 0.45, 0.5, 1)
+shader_parameter/shadow_color = Color(0.22, 0.28, 0.32, 1)
+shader_parameter/shadow_threshold = 0.1
+shader_parameter/shadow_softness = 0.1
+shader_parameter/rim_color = Color(0.75, 0.8, 0.88, 1)
+shader_parameter/rim_power = 3.0
+shader_parameter/rim_intensity = 0.08
+shader_parameter/specular_smoothness = 0.05
+shader_parameter/specular_intensity = 0.02
+
+[sub_resource type="StandardMaterial3D" id="Mat_cloud"]
+albedo_color = Color(1.0, 1.0, 1.0, 1.0)
+roughness = 1.0
+shading_mode = 0
+emission_enabled = true
+emission = Color(0.95, 0.95, 1.0, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_trunk"]
+top_radius = 0.6
+bottom_radius = 0.9
+height = 5.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_foliage"]
+radius = 3.5
+height = 5.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_rock"]
+radius = 1.0
+height = 1.2
+
+[sub_resource type="SphereMesh" id="SphereMesh_cloud"]
+radius = 4.0
+height = 2.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_hill"]
+size = Vector3(80, 25, 15)
+
+[sub_resource type="BoxMesh" id="BoxMesh_grass_patch"]
+size = Vector3(25, 0.15, 25)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
 size = Vector3(200, 0.5, 200)
@@ -154,17 +363,26 @@ script = ExtResource("1_park")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 30, 0)
-light_energy = 1.3
+light_color = Color(1.0, 0.98, 0.95, 1)
+light_energy = 0.65
 shadow_enabled = true
+shadow_blur = 1.0
+
+[node name="FillLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.353553, -0.353553, 0, 0.707107, 0.707107, 0.5, -0.612372, 0.612372, 0, 25, 0)
+light_color = Color(0.6, 0.7, 0.9, 1)
+light_energy = 0.1
+shadow_enabled = false
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cozy")
 
 [node name="Ground" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
 mesh = SubResource("BoxMesh_ground")
-surface_material_override/0 = SubResource("Mat_grass")
+surface_material_override/0 = SubResource("Mat_asphalt")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
 shape = SubResource("BoxShape3D_ground")
@@ -172,52 +390,52 @@ shape = SubResource("BoxShape3D_ground")
 [node name="GridX0" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
 mesh = SubResource("BoxMesh_gridline_x")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridX1" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, -20)
 mesh = SubResource("BoxMesh_gridline_x")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridX2" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 20)
 mesh = SubResource("BoxMesh_gridline_x")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridX3" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, -10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, -40)
 mesh = SubResource("BoxMesh_gridline_x")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridX4" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 40)
 mesh = SubResource("BoxMesh_gridline_x")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridZ0" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
 mesh = SubResource("BoxMesh_gridline_z")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridZ1" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.28, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.28, 0)
 mesh = SubResource("BoxMesh_gridline_z")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridZ2" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.28, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.28, 0)
 mesh = SubResource("BoxMesh_gridline_z")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridZ3" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.28, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0.28, 0)
 mesh = SubResource("BoxMesh_gridline_z")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="GridZ4" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.28, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0.28, 0)
 mesh = SubResource("BoxMesh_gridline_z")
-surface_material_override/0 = SubResource("Mat_gridline")
+surface_material_override/0 = SubResource("Mat_road_line")
 
 [node name="SpawnPoint" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -234,7 +452,7 @@ transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, -15, 0.5, 0)
 [node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp15deg"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.966936, -3.765997, 19.137148)
 mesh = SubResource("BoxMesh_ramp_med")
-surface_material_override/0 = SubResource("Mat_ramp")
+surface_material_override/0 = SubResource("ShaderMat_ramp_brown")
 
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp15deg"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.437872, -3.9966068, 18.877924)
@@ -245,7 +463,7 @@ transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, 0, 0.8, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp30deg"]
 mesh = SubResource("BoxMesh_ramp_med")
-surface_material_override/0 = SubResource("Mat_ramp")
+surface_material_override/0 = SubResource("ShaderMat_ramp_brown")
 
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp30deg"]
 shape = SubResource("BoxShape3D_ramp_med")
@@ -270,7 +488,7 @@ transform = Transform3D(1, 0, 0, 0, 0.707, 0.707, 0, -0.707, 0.707, 15, 1.2, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp45deg"]
 mesh = SubResource("BoxMesh_ramp_med")
-surface_material_override/0 = SubResource("Mat_yellow")
+surface_material_override/0 = SubResource("ShaderMat_yellow")
 
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp45deg"]
 shape = SubResource("BoxShape3D_ramp_med")
@@ -295,7 +513,7 @@ transform = Transform3D(1, 0, 0, 0, 0.5, 0.866, 0, -0.866, 0.5, -15, 1.8, 20)
 
 [node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp60deg"]
 mesh = SubResource("BoxMesh_ramp_med")
-surface_material_override/0 = SubResource("Mat_ramp")
+surface_material_override/0 = SubResource("ShaderMat_ramp_brown")
 
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp60deg"]
 shape = SubResource("BoxShape3D_ramp_med")
@@ -305,7 +523,7 @@ transform = Transform3D(1, 0, 0, 0, 0.259, 0.966, 0, -0.966, 0.259, 0, 2.5, 20)
 
 [node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp75deg"]
 mesh = SubResource("BoxMesh_ramp_med")
-surface_material_override/0 = SubResource("Mat_ramp")
+surface_material_override/0 = SubResource("ShaderMat_ramp_brown")
 
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp75deg"]
 shape = SubResource("BoxShape3D_ramp_med")
@@ -315,7 +533,7 @@ transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 15, 3, 20)
 
 [node name="Mesh" type="MeshInstance3D" parent="RampArea/Ramp90deg"]
 mesh = SubResource("BoxMesh_ramp_med")
-surface_material_override/0 = SubResource("Mat_yellow")
+surface_material_override/0 = SubResource("ShaderMat_yellow")
 
 [node name="Collision" type="CollisionShape3D" parent="RampArea/Ramp90deg"]
 shape = SubResource("BoxShape3D_ramp_med")
@@ -331,7 +549,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/LowRail"]
 mesh = SubResource("BoxMesh_rail")
-surface_material_override/0 = SubResource("Mat_rail")
+surface_material_override/0 = SubResource("ShaderMat_rail")
 
 [node name="Collision" type="CollisionShape3D" parent="RailArea/LowRail"]
 shape = SubResource("BoxShape3D_rail")
@@ -341,7 +559,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, 10)
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/MedRail"]
 mesh = SubResource("BoxMesh_rail")
-surface_material_override/0 = SubResource("Mat_rail")
+surface_material_override/0 = SubResource("ShaderMat_rail")
 
 [node name="Collision" type="CollisionShape3D" parent="RailArea/MedRail"]
 shape = SubResource("BoxShape3D_rail")
@@ -351,7 +569,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.5, 20)
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/HighRail"]
 mesh = SubResource("BoxMesh_rail")
-surface_material_override/0 = SubResource("Mat_rail")
+surface_material_override/0 = SubResource("ShaderMat_rail")
 
 [node name="Collision" type="CollisionShape3D" parent="RailArea/HighRail"]
 shape = SubResource("BoxShape3D_rail")
@@ -361,7 +579,7 @@ transform = Transform3D(0.707, 0, 0.707, 0, 1, 0, -0.707, 0, 0.707, 0, 0.8, 30)
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/DiagonalRail"]
 mesh = SubResource("BoxMesh_rail")
-surface_material_override/0 = SubResource("Mat_rail")
+surface_material_override/0 = SubResource("ShaderMat_rail")
 
 [node name="Collision" type="CollisionShape3D" parent="RailArea/DiagonalRail"]
 shape = SubResource("BoxShape3D_rail")
@@ -371,7 +589,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0.6, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/CurvedRailStart"]
 mesh = SubResource("BoxMesh_rail")
-surface_material_override/0 = SubResource("Mat_rail")
+surface_material_override/0 = SubResource("ShaderMat_rail")
 
 [node name="Collision" type="CollisionShape3D" parent="RailArea/CurvedRailStart"]
 shape = SubResource("BoxShape3D_rail")
@@ -381,7 +599,7 @@ transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, -18, 0.6, 10)
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/CurvedRailMid"]
 mesh = SubResource("BoxMesh_rail")
-surface_material_override/0 = SubResource("Mat_rail")
+surface_material_override/0 = SubResource("ShaderMat_rail")
 
 [node name="Collision" type="CollisionShape3D" parent="RailArea/CurvedRailMid"]
 shape = SubResource("BoxShape3D_rail")
@@ -391,7 +609,7 @@ transform = Transform3D(0.707, 0, 0.707, 0, 1, 0, -0.707, 0, 0.707, -22, 0.6, 20
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/CurvedRailEnd"]
 mesh = SubResource("BoxMesh_rail")
-surface_material_override/0 = SubResource("Mat_rail")
+surface_material_override/0 = SubResource("ShaderMat_rail")
 
 [node name="Collision" type="CollisionShape3D" parent="RailArea/CurvedRailEnd"]
 shape = SubResource("BoxShape3D_rail")
@@ -401,7 +619,7 @@ transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, 15, 0.3, 5)
 
 [node name="Mesh" type="MeshInstance3D" parent="RailArea/RailRampUp"]
 mesh = SubResource("BoxMesh_rail")
-surface_material_override/0 = SubResource("Mat_ramp")
+surface_material_override/0 = SubResource("ShaderMat_ramp_brown")
 
 [node name="Collision" type="CollisionShape3D" parent="RailArea/RailRampUp"]
 shape = SubResource("BoxShape3D_rail")
@@ -446,7 +664,7 @@ move_distance = Vector3(15, 0, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/MovingPlatform1"]
 mesh = SubResource("BoxMesh_platform")
-surface_material_override/0 = SubResource("Mat_platform")
+surface_material_override/0 = SubResource("ShaderMat_platform")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/MovingPlatform1"]
 shape = SubResource("BoxShape3D_platform")
@@ -459,7 +677,7 @@ move_duration = 2.5
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/MovingPlatform2"]
 mesh = SubResource("BoxMesh_platform")
-surface_material_override/0 = SubResource("Mat_platform")
+surface_material_override/0 = SubResource("ShaderMat_platform")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/MovingPlatform2"]
 shape = SubResource("BoxShape3D_platform")
@@ -473,7 +691,7 @@ move_duration = 2.0
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/MovingPlatformVert"]
 mesh = SubResource("BoxMesh_platform")
-surface_material_override/0 = SubResource("Mat_platform")
+surface_material_override/0 = SubResource("ShaderMat_platform")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/MovingPlatformVert"]
 shape = SubResource("BoxShape3D_platform")
@@ -486,7 +704,7 @@ swing_speed = 1.5
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/SwingingObstacle1"]
 mesh = SubResource("CylinderMesh_swing")
-surface_material_override/0 = SubResource("Mat_obstacle")
+surface_material_override/0 = SubResource("ShaderMat_obstacle")
 
 [node name="Hitbox" type="Area3D" parent="ObstacleArea/SwingingObstacle1"]
 
@@ -499,7 +717,7 @@ script = ExtResource("3_swing")
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/SwingingObstacle2"]
 mesh = SubResource("CylinderMesh_swing")
-surface_material_override/0 = SubResource("Mat_obstacle")
+surface_material_override/0 = SubResource("ShaderMat_obstacle")
 
 [node name="Hitbox" type="Area3D" parent="ObstacleArea/SwingingObstacle2"]
 
@@ -513,12 +731,12 @@ rotation_speed = 1.5
 
 [node name="Arm1" type="MeshInstance3D" parent="ObstacleArea/RotatingBarrier1"]
 mesh = SubResource("BoxMesh_barrier_arm")
-surface_material_override/0 = SubResource("Mat_obstacle")
+surface_material_override/0 = SubResource("ShaderMat_obstacle")
 
 [node name="Arm2" type="MeshInstance3D" parent="ObstacleArea/RotatingBarrier1"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 mesh = SubResource("BoxMesh_barrier_arm")
-surface_material_override/0 = SubResource("Mat_obstacle")
+surface_material_override/0 = SubResource("ShaderMat_obstacle")
 
 [node name="Hitbox" type="Area3D" parent="ObstacleArea/RotatingBarrier1"]
 
@@ -532,12 +750,12 @@ rotation_speed = -2.0
 
 [node name="Arm1" type="MeshInstance3D" parent="ObstacleArea/RotatingBarrier2"]
 mesh = SubResource("BoxMesh_barrier_arm")
-surface_material_override/0 = SubResource("Mat_obstacle")
+surface_material_override/0 = SubResource("ShaderMat_obstacle")
 
 [node name="Arm2" type="MeshInstance3D" parent="ObstacleArea/RotatingBarrier2"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 mesh = SubResource("BoxMesh_barrier_arm")
-surface_material_override/0 = SubResource("Mat_obstacle")
+surface_material_override/0 = SubResource("ShaderMat_obstacle")
 
 [node name="Hitbox" type="Area3D" parent="ObstacleArea/RotatingBarrier2"]
 
@@ -552,7 +770,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/ObstacleCourse/Pillar1"]
 mesh = SubResource("BoxMesh_pillar")
-surface_material_override/0 = SubResource("Mat_concrete")
+surface_material_override/0 = SubResource("ShaderMat_concrete")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/ObstacleCourse/Pillar1"]
 shape = SubResource("BoxShape3D_pillar")
@@ -562,7 +780,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/ObstacleCourse/Pillar2"]
 mesh = SubResource("BoxMesh_pillar")
-surface_material_override/0 = SubResource("Mat_concrete")
+surface_material_override/0 = SubResource("ShaderMat_concrete")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/ObstacleCourse/Pillar2"]
 shape = SubResource("BoxShape3D_pillar")
@@ -572,7 +790,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 6)
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/ObstacleCourse/Pillar3"]
 mesh = SubResource("BoxMesh_pillar")
-surface_material_override/0 = SubResource("Mat_concrete")
+surface_material_override/0 = SubResource("ShaderMat_concrete")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/ObstacleCourse/Pillar3"]
 shape = SubResource("BoxShape3D_pillar")
@@ -582,7 +800,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1, 12)
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/ObstacleCourse/Pillar4"]
 mesh = SubResource("BoxMesh_pillar")
-surface_material_override/0 = SubResource("Mat_concrete")
+surface_material_override/0 = SubResource("ShaderMat_concrete")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/ObstacleCourse/Pillar4"]
 shape = SubResource("BoxShape3D_pillar")
@@ -592,7 +810,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1, 12)
 
 [node name="Mesh" type="MeshInstance3D" parent="ObstacleArea/ObstacleCourse/Pillar5"]
 mesh = SubResource("BoxMesh_pillar")
-surface_material_override/0 = SubResource("Mat_concrete")
+surface_material_override/0 = SubResource("ShaderMat_concrete")
 
 [node name="Collision" type="CollisionShape3D" parent="ObstacleArea/ObstacleCourse/Pillar5"]
 shape = SubResource("BoxShape3D_pillar")
@@ -851,3 +1069,301 @@ outer_radius = 12.0
 sides = 64
 ring_sides = 16
 material = SubResource("Mat_bowl_floor")
+
+[node name="Decorations" type="Node3D" parent="."]
+
+[node name="Trees" type="Node3D" parent="Decorations"]
+
+[node name="Tree1" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 0, -60)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree2" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1.15, 0, 0, 0, 1.2, 0, 0, 0, 1.15, -80, 0, -30)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree3" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, -88, 0, 10)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree4" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1.1, 0, 0, 0, 1.05, 0, 0, 0, 1.1, -82, 0, 45)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree5" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, -50)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree6" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1.2, 0, 0, 0, 1.3, 0, 0, 0, 1.2, 90, 0, -15)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree7" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(0.95, 0, 0, 0, 0.9, 0, 0, 0, 0.95, 82, 0, 25)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree8" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 88, 0, 60)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree9" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1.05, 0, 0, 0, 1, 0, 0, 0, 1.05, -40, 0, -85)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree10" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1, 0, 0, 0, 0.95, 0, 0, 0, 1, 30, 0, -88)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree11" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(1.15, 0, 0, 0, 1.2, 0, 0, 0, 1.15, -50, 0, 92)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree11"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree11"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Tree12" type="Node3D" parent="Decorations/Trees"]
+transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, 45, 0, 88)
+
+[node name="Trunk" type="MeshInstance3D" parent="Decorations/Trees/Tree12"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+mesh = SubResource("CylinderMesh_trunk")
+surface_material_override/0 = SubResource("ShaderMat_tree_trunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="Decorations/Trees/Tree12"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+mesh = SubResource("SphereMesh_foliage")
+surface_material_override/0 = SubResource("ShaderMat_foliage")
+
+[node name="Rocks" type="Node3D" parent="Decorations"]
+
+[node name="Rock1" type="MeshInstance3D" parent="Decorations/Rocks"]
+transform = Transform3D(1.2, 0, 0, 0, 0.8, 0, 0, 0, 1.0, -75, 0.4, -45)
+mesh = SubResource("SphereMesh_rock")
+surface_material_override/0 = SubResource("ShaderMat_rock")
+
+[node name="Rock2" type="MeshInstance3D" parent="Decorations/Rocks"]
+transform = Transform3D(0.8, 0, 0, 0, 0.6, 0, 0, 0, 0.9, -78, 0.3, 35)
+mesh = SubResource("SphereMesh_rock")
+surface_material_override/0 = SubResource("ShaderMat_rock")
+
+[node name="Rock3" type="MeshInstance3D" parent="Decorations/Rocks"]
+transform = Transform3D(1.5, 0, 0, 0, 1.0, 0, 0, 0, 1.3, 78, 0.5, -35)
+mesh = SubResource("SphereMesh_rock")
+surface_material_override/0 = SubResource("ShaderMat_rock")
+
+[node name="Rock4" type="MeshInstance3D" parent="Decorations/Rocks"]
+transform = Transform3D(1.0, 0, 0, 0, 0.7, 0, 0, 0, 1.1, 72, 0.35, 50)
+mesh = SubResource("SphereMesh_rock")
+surface_material_override/0 = SubResource("ShaderMat_rock")
+
+[node name="Rock5" type="MeshInstance3D" parent="Decorations/Rocks"]
+transform = Transform3D(0.7, 0, 0, 0, 0.5, 0, 0, 0, 0.8, -20, 0.25, -78)
+mesh = SubResource("SphereMesh_rock")
+surface_material_override/0 = SubResource("ShaderMat_rock")
+
+[node name="Rock6" type="MeshInstance3D" parent="Decorations/Rocks"]
+transform = Transform3D(1.1, 0, 0, 0, 0.75, 0, 0, 0, 1.0, 55, 0.38, 75)
+mesh = SubResource("SphereMesh_rock")
+surface_material_override/0 = SubResource("ShaderMat_rock")
+
+[node name="GrassPatches" type="Node3D" parent="Decorations"]
+
+[node name="GrassPatch1" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 0.08, -55)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch2" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 0.08, -20)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch3" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 0.08, 15)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch4" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 0.08, 50)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch5" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0.08, -45)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch6" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0.08, -10)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch7" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0.08, 25)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch8" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0.08, 60)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch9" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, 0.08, -85)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch10" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0.08, -85)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch11" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.08, -85)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="GrassPatch12" type="MeshInstance3D" parent="Decorations/GrassPatches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 0.08, -85)
+mesh = SubResource("BoxMesh_grass_patch")
+surface_material_override/0 = SubResource("ShaderMat_grass")
+
+[node name="Hills" type="Node3D" parent="Decorations"]
+
+[node name="Hill1" type="MeshInstance3D" parent="Decorations/Hills"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, -150)
+mesh = SubResource("BoxMesh_hill")
+surface_material_override/0 = SubResource("ShaderMat_hill")
+
+[node name="Hill2" type="MeshInstance3D" parent="Decorations/Hills"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -150, 8, 0)
+mesh = SubResource("BoxMesh_hill")
+surface_material_override/0 = SubResource("ShaderMat_hill")
+
+[node name="Hill3" type="MeshInstance3D" parent="Decorations/Hills"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 150, 6, 20)
+mesh = SubResource("BoxMesh_hill")
+surface_material_override/0 = SubResource("ShaderMat_hill")
+
+[node name="Clouds" type="Node3D" parent="Decorations"]
+
+[node name="Cloud1" type="MeshInstance3D" parent="Decorations/Clouds"]
+transform = Transform3D(1.5, 0, 0, 0, 1, 0, 0, 0, 1.2, -60, 45, -80)
+mesh = SubResource("SphereMesh_cloud")
+surface_material_override/0 = SubResource("Mat_cloud")
+
+[node name="Cloud2" type="MeshInstance3D" parent="Decorations/Clouds"]
+transform = Transform3D(1.8, 0, 0, 0, 0.9, 0, 0, 0, 1.5, 50, 50, -60)
+mesh = SubResource("SphereMesh_cloud")
+surface_material_override/0 = SubResource("Mat_cloud")
+
+[node name="Cloud3" type="MeshInstance3D" parent="Decorations/Clouds"]
+transform = Transform3D(1.3, 0, 0, 0, 1.1, 0, 0, 0, 1.4, -30, 55, 70)
+mesh = SubResource("SphereMesh_cloud")
+surface_material_override/0 = SubResource("Mat_cloud")
+
+[node name="Cloud4" type="MeshInstance3D" parent="Decorations/Clouds"]
+transform = Transform3D(2.0, 0, 0, 0, 0.8, 0, 0, 0, 1.6, 80, 48, 40)
+mesh = SubResource("SphereMesh_cloud")
+surface_material_override/0 = SubResource("Mat_cloud")
+
+[node name="Cloud5" type="MeshInstance3D" parent="Decorations/Clouds"]
+transform = Transform3D(1.4, 0, 0, 0, 1.0, 0, 0, 0, 1.3, -90, 52, 0)
+mesh = SubResource("SphereMesh_cloud")
+surface_material_override/0 = SubResource("Mat_cloud")

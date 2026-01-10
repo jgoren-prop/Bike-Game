@@ -177,6 +177,8 @@ var _landing_grace_timer: float = 0.0  # Reduces alignment right after landing
 @onready var _camera: Camera3D = $CameraPivot/Camera3D
 @onready var _front_wheel_probe: ShapeCast3D = $FrontWheelProbe
 @onready var _rear_wheel_probe: ShapeCast3D = $RearWheelProbe
+@onready var _front_dust_particles: GPUParticles3D = $FrontDustParticles
+@onready var _rear_dust_particles: GPUParticles3D = $RearDustParticles
 
 signal speed_changed(speed: float)
 signal flip_completed(flip_type: String, rotation_count: int)
@@ -684,6 +686,9 @@ func _physics_process(delta: float) -> void:
 
 	# Emit speed
 	speed_changed.emit(get_current_speed())
+	
+	# === DUST PARTICLE EFFECTS ===
+	_update_dust_particles(speed)
 
 
 func _check_ground() -> void:
@@ -1552,6 +1557,46 @@ func _animate_bike(delta: float) -> void:
 			_pedal_arm_left.rotation.y = sin(Time.get_ticks_msec() * 0.01 * pedal_speed) * 0.5
 		if _pedal_arm_right:
 			_pedal_arm_right.rotation.y = sin(Time.get_ticks_msec() * 0.01 * pedal_speed + PI) * 0.5
+
+
+# === DUST PARTICLE EFFECTS ===
+
+func _update_dust_particles(speed: float) -> void:
+	## Control dust particle emission based on grounding and speed.
+	## Dust emits when wheels are touching ground and bike is moving.
+	
+	if not _front_dust_particles or not _rear_dust_particles:
+		return
+	
+	# Dust threshold - emit dust when moving faster than this (m/s)
+	var dust_speed_threshold: float = 2.0
+	var dust_speed_max: float = 12.0  # Full dust intensity at this speed
+	
+	# Calculate dust intensity based on speed
+	var dust_intensity: float = clampf((speed - dust_speed_threshold) / (dust_speed_max - dust_speed_threshold), 0.0, 1.0)
+	
+	# Front wheel dust
+	var front_should_emit: bool = _front_grounded and speed > dust_speed_threshold
+	_front_dust_particles.emitting = front_should_emit
+	if front_should_emit:
+		# Adjust emission amount based on speed (more dust at higher speed)
+		_front_dust_particles.amount_ratio = dust_intensity
+	
+	# Rear wheel dust - more prominent since it's the drive wheel
+	var rear_should_emit: bool = _rear_grounded and speed > dust_speed_threshold
+	_rear_dust_particles.emitting = rear_should_emit
+	if rear_should_emit:
+		_rear_dust_particles.amount_ratio = dust_intensity
+	
+	# Burst of dust on landing
+	if _landing_squash > 0.02:
+		# Landing impact - emit extra dust briefly
+		_front_dust_particles.emitting = _front_grounded
+		_rear_dust_particles.emitting = _rear_grounded
+		if _front_grounded:
+			_front_dust_particles.amount_ratio = 1.0
+		if _rear_grounded:
+			_rear_dust_particles.amount_ratio = 1.0
 
 
 # === FLIP TRACKING ===
